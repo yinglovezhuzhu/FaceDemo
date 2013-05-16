@@ -4,5 +4,10 @@
     <string name="app_name">FaceDemo</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    
+    <string name="choose_pic">选择图片</string>
+    <string name="take_pic">拍照</string>
+    
+    <string name="pick_image_err">图片选取错误，请重新选择！</string>
 
 </resources>
