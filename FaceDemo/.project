@@ -30,11 +30,4 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>faceplusplus_api</name>
-			<type>2</type>
-			<location>/home/xiaoying/git/FacePlusPlusAPI_V2/FacePlusPlusAPI_V2/src</location>
-		</link>
-	</linkedResources>
 </projectDescription>

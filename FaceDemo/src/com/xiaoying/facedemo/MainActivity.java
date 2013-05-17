@@ -1,10 +1,7 @@
 package com.xiaoying.facedemo;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;

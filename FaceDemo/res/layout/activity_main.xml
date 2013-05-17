@@ -25,12 +25,14 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
-	        android:text="@string/choose_pic"/>
+	        android:text="@string/choose_pic"
+	        android:background="@drawable/selector_btn"/>
 	    <Button 
 	        android:id="@+id/btn_take_pic"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
-	        android:text="@string/take_pic"/>
+	        android:text="@string/take_pic"
+	        android:background="@drawable/selector_btn"/>
 	</LinearLayout>
 </RelativeLayout>

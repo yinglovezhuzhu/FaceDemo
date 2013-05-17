@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 白色 -->
     <color name="white">#FFFFFFFF</color>
+    <!-- 群青色 -->
+    <color name="green_blue">#FF4E72B8</color>
+    <!-- 瑠璃色 -->
+    <color name="grass_blue">#FF2A5CAA</color>
+    <!-- 青色 -->
+    <color name="green">#FF009AD6</color>
+    <!-- 乳白色 -->
+    <color name="milk_white">#FFD3D7D4</color>
+    <!-- 淡蓝色 -->
+    <color name="light_blue">#FF33A3DC</color>
+    <!-- 淡蓝色——半透明 -->
+    <color name="alpha_light_blue">#8833A3DC</color>
+    <!-- 透明色 -->
+    <color name="transparent">#00FFFFFF</color>
 </resources>
