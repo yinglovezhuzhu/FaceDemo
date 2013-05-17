@@ -130,7 +130,7 @@ public class DetectActivity extends Activity {
 		@Override
 		protected DetectResp doInBackground(File... params) {
 			DetectReq req = new DetectReq(params[0]);
-			req.setAsync(true);
+			req.setAsync(false);
 			FaceService service = new FaceService(mClient);
 			try {
 				return service.detect(req);
