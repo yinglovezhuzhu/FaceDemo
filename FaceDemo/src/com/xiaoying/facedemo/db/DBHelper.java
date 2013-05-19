@@ -54,7 +54,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		db.execSQL("create table if not exists images(img_id TEXT PRIMARY KEY, img TEXT, url TEXT, width INTEGER, height INTEGER)");
 		
 		//faces表，保存所有的face
-		db.execSQL("create table if not exists faces(face_id TEXT PRIMARY KEY, ima_id TEXT, center_x REAL, center_y REAL, " +
+		db.execSQL("create table if not exists faces(face_id TEXT PRIMARY KEY, img_id TEXT, center_x REAL, center_y REAL, " +
 				"eye_left_x REAL, eye_left_y REAL, eye_right_x REAL, eye_right_y REAL, nose_x REAL, nose_y REAL, " +
 				"mouth_left_x REAL, mouth_left_y REAL, mouth_right_x REAL, mouth_right_y REAL, width REAL, height REAL, " +
 				"age_value INTEGER, age_range INTEGER, gender_value TEXT, gender_confidence REAL, race_value TEXT, " +

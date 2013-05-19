@@ -152,6 +152,9 @@ public class DetectActivity extends Activity {
 			if(result != null) {
 				LogUtil.i(tag, result);
 				if(result.getError_code() == RespConfig.RESP_OK) {
+					
+				} else {
+					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
 			}
 		}

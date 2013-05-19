@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import com.xiaoying.faceplusplus.api.cliet.Client;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.config.UrlConfig;
+import com.xiaoying.faceplusplus.api.entity.Face;
 import com.xiaoying.faceplusplus.api.entity.request.recognition.CompareReq;
 import com.xiaoying.faceplusplus.api.entity.request.recognition.IdentityReq;
 import com.xiaoying.faceplusplus.api.entity.request.recognition.SearchReq;
@@ -224,14 +225,18 @@ public class RecognitionService extends BaseService {
 		List<IdentityResp.IdentityFace> faces = new ArrayList<IdentityResp.IdentityFace>();
 		if(faceArray != null) {
 			JSONObject faceObj = null;
-			IdentityResp.IdentityFace face = null;
+			IdentityResp.IdentityFace iFace = null;
+			Face face = null;
 			for(int i = 0; i < faceArray.length(); i++) {
 				faceObj = faceArray.optJSONObject(i);
-				face = new IdentityResp.IdentityFace();
+				iFace = new IdentityResp.IdentityFace();
+				face = new Face();
 				face.setFace_id(faceObj.optString("face_id"));
-				face.setCandidates(getIdentityCanditate(faceObj.optJSONArray("candidate")));
-				face.setPosition(FaceService.getPosition(faceObj.optJSONObject("position")));
-				faces.add(face);
+				FaceService.setPosition(faceObj.optJSONObject("position"), face);
+				iFace.setCandidates(getIdentityCanditate(faceObj.optJSONArray("candidate")));
+//				iFace.setPosition(FaceService.getPosition(faceObj.optJSONObject("position")));
+				iFace.setFace(face);
+				faces.add(iFace);
 			}
 		}
 		return faces;

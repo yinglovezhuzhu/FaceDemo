@@ -282,15 +282,23 @@ public class InfoService extends BaseService {
 		if(faceInfoArray != null) {
 			JSONObject faceInfoObj = null;
 			FaceInfo faceInfo = null;
+			Face face = null;
 			for(int i = 0; i < faceInfoArray.length(); i++) {
 				faceInfoObj = faceInfoArray.optJSONObject(i);
 				faceInfo = new FaceInfo();
-				faceInfo.setFace_id(faceInfoObj.optString("face_id"));
-				faceInfo.setImg_id(faceInfoObj.optString("img_id"));
-				faceInfo.setUrl(faceInfoObj.optString("url"));
-				faceInfo.setTag(faceInfoObj.optString("tag"));
-				faceInfo.setAttribute(getAttribute(faceInfoObj.optJSONObject("attribute")));
-				faceInfo.setPosition(FaceService.getPosition(faceInfoObj.optJSONObject("position")));
+				face = new Face();
+//				faceInfo.setFace_id(faceInfoObj.optString("face_id"));
+//				faceInfo.setImg_id(faceInfoObj.optString("img_id"));
+//				faceInfo.setUrl(faceInfoObj.optString("url"));
+//				faceInfo.setTag(faceInfoObj.optString("tag"));
+				face.setFace_id(faceInfoObj.optString("face_id"));
+				face.setImg_id(faceInfoObj.optString("img_id"));
+				face.setUrl(faceInfoObj.optString("url"));
+				face.setTag(faceInfoObj.optString("tag"));
+				FaceService.setAttribute(faceInfoObj.optJSONObject("attribute"), face);
+				FaceService.setPosition(faceInfoObj.optJSONObject("position"), face);
+//				faceInfo.setAttribute(getAttribute(faceInfoObj.optJSONObject("attribute")));
+//				faceInfo.setPosition(FaceService.getPosition(faceInfoObj.optJSONObject("position")));
 				faceInfo.setPerson(getPersons(faceInfoObj.optJSONArray("person")));
 				faceInfo.setFaceset(getFacesets(faceInfoObj.optJSONArray("faceset")));
 				faceInfos.add(faceInfo);
@@ -314,7 +322,8 @@ public class InfoService extends BaseService {
 				face = new Face();
 				face.setFace_id(faceObj.optString("face_id"));
 				face.setTag(faceObj.optString("tag"));
-				face.setPosition(FaceService.getPosition(faceObj.optJSONObject("position")));
+				FaceService.setPosition(faceObj.optJSONObject("position"), face);
+//				face.setPosition(FaceService.getPosition(faceObj.optJSONObject("position")));
 				faces.add(face);
 			}
 		}
@@ -387,28 +396,28 @@ public class InfoService extends BaseService {
 		return groups;
 	}
 
-	/**
-	 * 解析JSONArray中的Face.Attribute
-	 * @param attributeObj
-	 * @return
-	 */
-	private Face.Attribute getAttribute(JSONObject attributeObj) {
-		Face.Attribute attribute = new Face.Attribute();
-		JSONObject ageObj = attributeObj.optJSONObject("age");
-		Face.Age age = new Face.Age();
-		age.setValue(ageObj.optInt("value"));
-		age.setRange(ageObj.optInt("range"));
-		attribute.setAge(age);
-		JSONObject genderObj = attributeObj.optJSONObject("gender");
-		Face.Gender gender = new Face.Gender();
-		gender.setValue(genderObj.optString("value"));
-		gender.setConfidence(Float.valueOf(genderObj.optString("confidence")));
-		attribute.setGender(gender);
-		JSONObject raceObj = attributeObj.optJSONObject("race");
-		Face.Race race = new Face.Race();
-		race.setValue(raceObj.optString("value"));
-		race.setConfidence(Float.valueOf(raceObj.optString("confidence")));
-		attribute.setRace(race);
-		return attribute;
-	}
+//	/**
+//	 * 解析JSONArray中的Face.Attribute
+//	 * @param attributeObj
+//	 * @return
+//	 */
+//	private Face.Attribute getAttribute(JSONObject attributeObj) {
+//		Face.Attribute attribute = new Face.Attribute();
+//		JSONObject ageObj = attributeObj.optJSONObject("age");
+//		Face.Age age = new Face.Age();
+//		age.setValue(ageObj.optInt("value"));
+//		age.setRange(ageObj.optInt("range"));
+//		attribute.setAge(age);
+//		JSONObject genderObj = attributeObj.optJSONObject("gender");
+//		Face.Gender gender = new Face.Gender();
+//		gender.setValue(genderObj.optString("value"));
+//		gender.setConfidence(Float.valueOf(genderObj.optString("confidence")));
+//		attribute.setGender(gender);
+//		JSONObject raceObj = attributeObj.optJSONObject("race");
+//		Face.Race race = new Face.Race();
+//		race.setValue(raceObj.optString("value"));
+//		race.setConfidence(Float.valueOf(raceObj.optString("confidence")));
+//		attribute.setRace(race);
+//		return attribute;
+//	}
 }

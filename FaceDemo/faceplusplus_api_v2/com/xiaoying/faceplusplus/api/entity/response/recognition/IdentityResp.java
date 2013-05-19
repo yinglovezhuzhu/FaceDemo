@@ -79,37 +79,25 @@ public class IdentityResp extends BaseResponse {
 	 *
 	 */
 	public static class IdentityFace {
-		private String face_id;	//识别匹配的face_id
-		private Face.Position position;	//识别匹配的face_id相关的位置信息
+		private Face face;	//人脸信息
 		private List<Candidate> candidates;	//识别结果。candidates包含不超过3个人，包含相应person信息与相应的置信度
+		
 		/**
-		 * 识别匹配的face_id
-		 * @return the face_id
+		 * 人脸信息
+		 * @return
 		 */
-		public String getFace_id() {
-			return face_id;
+		public Face getFace() {
+			return face;
 		}
+		
 		/**
-		 * 识别匹配的face_id
-		 * @param face_id the face_id to set
+		 * 人脸信息
+		 * @param face
 		 */
-		public void setFace_id(String face_id) {
-			this.face_id = face_id;
+		public void setFace(Face face) {
+			this.face = face;
 		}
-		/**
-		 * 识别匹配的face_id相关的位置信息
-		 * @return the position
-		 */
-		public Face.Position getPosition() {
-			return position;
-		}
-		/**
-		 * 识别匹配的face_id相关的位置信息
-		 * @param position the position to set
-		 */
-		public void setPosition(Face.Position position) {
-			this.position = position;
-		}
+
 		/**
 		 * 识别结果。candidates包含不超过3个人，包含相应person信息与相应的置信度
 		 * @return the candidates
@@ -124,14 +112,13 @@ public class IdentityResp extends BaseResponse {
 		public void setCandidates(List<Candidate> candidates) {
 			this.candidates = candidates;
 		}
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
+
 		@Override
 		public String toString() {
-			return "IdentityFace [face_id=" + face_id + ", position="
-					+ position + ", candidates=" + candidates + "]";
+			return "IdentityFace [face=" + face + ", candidates=" + candidates
+					+ "]";
 		}
+		
 	}
 	
 	/**
