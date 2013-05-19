@@ -86,8 +86,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	private void takePic() {
 		Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-			String imagePath = MainApplication.APP_PIC_PATH + StringUtil.createImageName();
-			takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(imagePath)));
+			mImagePath = MainApplication.APP_PIC_PATH + StringUtil.createImageName();
+			takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(mImagePath)));
 			startActivityForResult(takePhotoIntent, REQUEST_TAKE_PIC);
 		} else {
 			Toast.makeText(this, "没有检测到SDcard，请检查SDcard！", Toast.LENGTH_SHORT).show();
