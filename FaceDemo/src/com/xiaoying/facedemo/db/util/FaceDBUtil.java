@@ -18,10 +18,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.PointF;
 
 import com.xiaoying.facedemo.db.DBHelper;
 import com.xiaoying.faceplusplus.api.entity.Face;
-import com.xiaoying.faceplusplus.api.entity.PointF;
 
 /**
  * 功能：Face数据操作工具类

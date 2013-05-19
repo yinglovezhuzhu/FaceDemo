@@ -22,7 +22,7 @@ import com.xiaoying.faceplusplus.api.entity.response.BaseResponse;
  */
 public class DetectResp extends BaseResponse {
 	private String session_id;
-	private String image_id;
+	private String img_id;
 	private String url;
 	private int img_height;
 	private int img_width;
@@ -33,11 +33,11 @@ public class DetectResp extends BaseResponse {
 	public void setSession_id(String session_id) {
 		this.session_id = session_id;
 	}
-	public String getImage_id() {
-		return image_id;
+	public String getImg_id() {
+		return img_id;
 	}
-	public void setImage_id(String image_id) {
-		this.image_id = image_id;
+	public void setImg_id(String img_id) {
+		this.img_id = img_id;
 	}
 	public String getUrl() {
 		return url;
@@ -66,8 +66,8 @@ public class DetectResp extends BaseResponse {
 	
 	@Override
 	public String toString() {
-		return "DetectResp [session_id=" + session_id + ", image_id="
-				+ image_id + ", url=" + url + ", img_height=" + img_height
+		return "DetectResp [session_id=" + session_id + ", img_id="
+				+ img_id + ", url=" + url + ", img_height=" + img_height
 				+ ", img_width=" + img_width + ", face=" + face + ", error="
 				+ error + ", error_code=" + error_code + "]";
 	}

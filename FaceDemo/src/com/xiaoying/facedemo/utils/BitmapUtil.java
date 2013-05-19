@@ -13,13 +13,23 @@ public class BitmapUtil {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(path, options);
-		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+		options.inSampleSize = calculateInSampleSize(path, reqWidth, reqHeight);
 		LogUtil.e(tag, "inSimpleSize =====>>>>" + options.inSampleSize);
 		options.inJustDecodeBounds = false;
 		return BitmapFactory.decodeFile(path, options);
 	}
+	
+	public static Bitmap loadBitmap(String path, int inSampleSize) {
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inSampleSize = inSampleSize;
+		LogUtil.e(tag, "inSimpleSize =====>>>>" + options.inSampleSize);
+		return BitmapFactory.decodeFile(path, options);
+	}
 
-	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+	public static int calculateInSampleSize(String path, int reqWidth, int reqHeight) {
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(path, options);
 		// Raw height and width of image
 		final int height = options.outHeight;
 		final int width = options.outWidth;

@@ -9,6 +9,9 @@
  * 版本：v1.0
  */
 package com.xiaoying.faceplusplus.api.entity;
+
+import android.graphics.PointF;
+
 /**
  * 功能：人脸实体类
  * @author xiaoying

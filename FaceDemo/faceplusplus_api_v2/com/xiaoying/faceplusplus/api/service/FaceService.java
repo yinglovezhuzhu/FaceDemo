@@ -25,11 +25,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.PointF;
+
 import com.xiaoying.faceplusplus.api.cliet.Client;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.config.UrlConfig;
 import com.xiaoying.faceplusplus.api.entity.Face;
-import com.xiaoying.faceplusplus.api.entity.PointF;
 import com.xiaoying.faceplusplus.api.entity.request.face.DetectReq;
 import com.xiaoying.faceplusplus.api.entity.response.face.DetectResp;
 import com.xiaoying.faceplusplus.api.utils.HttpUtil;
@@ -80,7 +81,7 @@ public class FaceService extends BaseService {
 		Log.i(json.toString());
 		DetectResp result = new DetectResp();
 		result.setSession_id(json.optString("session_id"));
-		result.setImage_id(json.optString("img_id"));
+		result.setImg_id(json.optString("img_id"));
 		result.setUrl(json.optString("url"));
 		result.setImg_width(json.optInt("img_width"));
 		result.setImg_height(json.optInt("img_height"));
@@ -94,9 +95,7 @@ public class FaceService extends BaseService {
 				face = new Face();
 				face.setFace_id(faceObj.optString("face_id"));
 				face.setTag(faceObj.optString("tag"));
-//				face.setAttribute(getAttribute(faceObj.optJSONObject("attribute")));
 				setAttribute(faceObj.optJSONObject("attribute"), face);
-//				face.setPosition(getPosition(faceObj.optJSONObject("position")));
 				setPosition(faceObj.optJSONObject("position"), face);
 				faces.add(face);
 			}

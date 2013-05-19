@@ -3,6 +3,7 @@ package com.xiaoying.facedemo.detect;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -11,9 +12,17 @@ import org.json.JSONException;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.graphics.PointF;
+import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -28,6 +37,7 @@ import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.cliet.Client;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
+import com.xiaoying.faceplusplus.api.entity.Face;
 import com.xiaoying.faceplusplus.api.entity.request.face.DetectReq;
 import com.xiaoying.faceplusplus.api.entity.response.face.DetectResp;
 import com.xiaoying.faceplusplus.api.service.FaceService;
@@ -35,6 +45,15 @@ import com.xiaoying.faceplusplus.api.service.FaceService;
 public class DetectActivity extends Activity {
 	
 	private String tag = DetectActivity.class.getSimpleName();
+	
+	public static final float OUTER_WIDTH = 15f;
+	
+	public static final float INER_WIDTH = 4f;
+	
+	public static final float INER_OUTER_DIST = 5f;
+	
+	/** 内框和外框的间距 */
+	private float mIODist = 8f;
 
 	private TitleBar mTitleBar = null;
 	
@@ -42,9 +61,15 @@ public class DetectActivity extends Activity {
 	
 	private Bitmap mBitmap = null;
 	
+	private int mInSampleSize = 1;
+	
 	private String mBitmapPath = null;
 	
-	
+	private float mOuterWidth = OUTER_WIDTH;
+	/** 框透明度 */
+	private int mAlpha = 130;
+	/** 框颜色 */
+	private int mBorderColor = Color.argb(mAlpha, 0x00, 0x9A, 0xD6);
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +84,11 @@ public class DetectActivity extends Activity {
 		DisplayMetrics m = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(m);
 		
-		mBitmap = BitmapUtil.loadBitmap(mBitmapPath, m.widthPixels, m.heightPixels);
+		mInSampleSize = BitmapUtil.calculateInSampleSize(mBitmapPath, m.widthPixels, m.heightPixels);
+		
+		Bitmap bitmap = BitmapUtil.loadBitmap(mBitmapPath, mInSampleSize);
+		mBitmap = bitmap.copy(Config.ARGB_8888, true);
+		bitmap.recycle();
 		
 		LogUtil.w(tag, "Bitmap size++++>>>(" + mBitmap.getWidth() + ", " + mBitmap.getHeight()  + ")");
 		
@@ -152,11 +181,101 @@ public class DetectActivity extends Activity {
 			if(result != null) {
 				LogUtil.i(tag, result);
 				if(result.getError_code() == RespConfig.RESP_OK) {
-					
+					List<Face> faces = result.getFace();
+					Canvas canvas = new Canvas(mBitmap);
+					Paint paint = new Paint();
+					paint.setColor(mBorderColor);
+					paint.setStyle(Style.STROKE);
+					paint.setStrokeWidth(getStrokeWidth(mBitmap, mImageView, OUTER_WIDTH));
+					Log.e("BBBB", "Stroke width+++++>>>" + paint.getStrokeWidth());
+					canvas.drawBitmap(mBitmap, 0, 0, paint);
+					int width = mBitmap.getWidth();
+					int height = mBitmap.getHeight();
+					for (Face face : faces) {
+						LogUtil.w(tag, face);
+						drawOuterRect(canvas, paint, face, width, height);
+						drawInerRect(canvas, paint, face, width, height);
+					}
+					mImageView.setImageBitmap(mBitmap);
 				} else {
 					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
 			}
 		}
+	}
+	
+	private void drawOuterRect(Canvas canvas, Paint paint, Face face, int bmWidth, int bmHeight) {
+		PointF center = face.getCenter();
+		float width = face.getWidth();
+		float height = face.getHeight();
+//		PointF eyeLeft = face.getEye_left();
+//		canvas.drawPoint(bmWidth * (eyeLeft.x / 100), bmHeight * (eyeLeft.y / 100), paint);
+//		PointF eyeRight = face.getEye_right();
+//		canvas.drawPoint(bmWidth * (eyeRight.x / 100), bmHeight * (eyeRight.y / 100), paint);
+		paint.setStrokeWidth(OUTER_WIDTH * getScale(mBitmap, mImageView));
+		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) - paint.getStrokeWidth();
+		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) - paint.getStrokeWidth();
+		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) + paint.getStrokeWidth();
+		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) + paint.getStrokeWidth();
+		RectF rect = new RectF(left, top, right, bottom);
+		canvas.drawRect(rect, paint);
+	}
+	
+	private void drawInerRect(Canvas canvas, Paint paint, Face face, int bmWidth, int bmHeight) {
+		PointF center = face.getCenter();
+		float width = face.getWidth();
+		float height = face.getHeight();
+		paint.setStrokeWidth(INER_WIDTH * getScale(mBitmap, mImageView));
+		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) + mIODist;
+		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) + mIODist;
+		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) - mIODist;
+		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) - mIODist;
+		
+		float inerLength = (right - left) / 3;
+		float [] points = {
+				left, top, left + inerLength, top, 
+				left, top, left, top + inerLength, 
+				right - inerLength, top, right, top, 
+				right, top, right, top + inerLength, 
+				left, bottom - inerLength, left, bottom, 
+				left, bottom, left + inerLength, bottom,
+				right - inerLength, bottom, right, bottom, 
+				right, bottom - inerLength, right, bottom,
+		};
+		canvas.drawLines(points, paint);
+	}
+	
+	
+	private float getStrokeWidth(final Bitmap bm, ImageView iv, float real) {
+		int ivWidth = iv.getWidth();
+		int ivHeight = iv.getHeight();
+		int bmWidth = bm.getWidth();
+		int bmHeight = bm.getHeight();
+		if(ivWidth > bmWidth && ivHeight > bmHeight) {
+			return real;
+		}
+		float wScale = (float)bmWidth / ivWidth;
+		float hScale = (float) bmHeight / ivHeight;
+		float scale = wScale < hScale ? wScale : hScale;
+		return real * scale;
+	}
+	
+	/**
+	 * 计算Bitmap跟显示在ImageView中的倍数
+	 * @param bm
+	 * @param iv
+	 * @return
+	 */
+	private float getScale(final Bitmap bm, final ImageView iv) {
+		int ivWidth = iv.getWidth();
+		int ivHeight = iv.getHeight();
+		int bmWidth = bm.getWidth();
+		int bmHeight = bm.getHeight();
+		if(ivWidth > bmWidth && ivHeight > bmHeight) {
+			return 1f;
+		}
+		float wScale = (float)bmWidth / ivWidth;
+		float hScale = (float) bmHeight / ivHeight;
+		return wScale < hScale ? wScale : hScale;
 	}
 }
