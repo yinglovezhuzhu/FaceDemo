@@ -155,14 +155,14 @@ public class MarkFaceView extends FrameLayout {
 		calculatePosition(mBitmap);
 		int bmWidth = mBitmap.getWidth();
 		int bmHeight = mBitmap.getHeight();
-		mOuterBorderWidth = getStrokeWidth(bmWidth, bmHeight, mOuterBorderWidth);
-		mInnerBorderWidth = getStrokeWidth(bmWidth, bmHeight, mInnerBorderWidth);
+		float outerBorderWidth = getStrokeWidth(bmWidth, bmHeight, mOuterBorderWidth);
+		float innerBorderWidth = getStrokeWidth(bmWidth, bmHeight, mInnerBorderWidth);
 		mPaint.setColor(mBorderColor);
 		mPaint.setStyle(Style.STROKE);
 		for (Face face : faces) {
-			mPaint.setStrokeWidth(mOuterBorderWidth);
+			mPaint.setStrokeWidth(outerBorderWidth);
 			drawOuterRect(mCanvas, mPaint, face, bmWidth, bmHeight);
-			mPaint.setStrokeWidth(mInnerBorderWidth);
+			mPaint.setStrokeWidth(innerBorderWidth);
 			drawInerRect(mCanvas, mPaint, face, bmWidth, bmHeight);
 		}
 		mImageView.setImageBitmap(mBitmap);

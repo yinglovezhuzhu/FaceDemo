@@ -142,6 +142,37 @@ public class FacesetDBUtil {
 		db.close();
 		return facesets;
 	}
+
+	/**
+	 * 根据关键字后模糊查找相关的Faceset列表
+	 * @param context
+	 * @param keyName
+	 * @return
+	 * @throws SQLiteException
+	 */
+	public static List<Faceset> getFacesetsByKeyName(Context context, String keyName) throws SQLiteException {
+		SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
+		List<Faceset> facesets = new ArrayList<Faceset>();
+		Faceset faceset = null;
+		Cursor cursor = db.query("facesets", null, "faceset_name like ?", new String [] {keyName + "%", }, null, null, null);
+		if(cursor != null) {
+			if(cursor.moveToFirst()) {
+				int idIndex = cursor.getColumnIndex("faceset_id");
+				int nameIndex = cursor.getColumnIndex("faceset_name");
+				int tagIndex = cursor.getColumnIndex("tag");
+				do {
+					faceset = new Faceset();
+					faceset.setFaceset_id(cursor.getString(idIndex));
+					faceset.setFaceset_name(cursor.getString(nameIndex));
+					faceset.setTag(cursor.getString(tagIndex));
+					facesets.add(faceset);
+				} while(cursor.moveToNext());
+			}
+			cursor.close();
+		}
+		db.close();
+		return facesets;
+	}
 	
 	/**
 	 * 根据ID删除一个Faceset
@@ -244,5 +275,6 @@ public class FacesetDBUtil {
 		values.put("faceset_id", faceset.getFaceset_id());
 		values.put("faceset_name", faceset.getFaceset_name());
 		values.put("tag", faceset.getTag());
+		values.put("face_count", 0);
 	}
 }

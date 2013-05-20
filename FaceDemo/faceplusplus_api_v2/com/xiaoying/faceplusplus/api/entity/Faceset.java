@@ -22,6 +22,7 @@ public class Faceset {
 	private String faceset_name;	//相应Faceset的name
 	private String faceset_id;	//相应Faceset的id
 	private String tag;	//Faceset相关的tag
+	private int face_count;	//这个Faceset下包含的face个数
 	private List<Face> face;	//属于该faceset的face信息
 	/**
 	 * 相应Faceset的name
@@ -65,6 +66,21 @@ public class Faceset {
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
+	
+	/**
+	 * 这个Faceset下包含的face个数
+	 * @return the face_count
+	 */
+	public int getFace_count() {
+		return face_count;
+	}
+	/**
+	 * 这个Faceset下包含的face个数
+	 * @param face_count the face_count to set
+	 */
+	public void setFace_count(int face_count) {
+		this.face_count = face_count;
+	}
 	/**
 	 * 属于该faceset的face信息
 	 * @return the face
@@ -84,8 +100,8 @@ public class Faceset {
 	 */
 	@Override
 	public String toString() {
-		return "FacesetGetInfoResp [faceset_name=" + faceset_name
-				+ ", faceset_id=" + faceset_id + ", tag=" + tag + ", face="
-				+ face + "]";
+		return "Faceset [faceset_name=" + faceset_name + ", faceset_id="
+				+ faceset_id + ", tag=" + tag + ", face_count=" + face_count
+				+ ", face=" + face + "]";
 	}
 }

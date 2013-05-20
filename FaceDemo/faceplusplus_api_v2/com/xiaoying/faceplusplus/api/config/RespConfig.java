@@ -20,4 +20,6 @@ public class RespConfig {
 
 	public final static int RESP_OK = 0;
 	
+	public final static int FACESET_MAX_FACE = 10000;
+	
 }
