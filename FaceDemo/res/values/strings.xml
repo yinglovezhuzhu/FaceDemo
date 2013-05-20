@@ -7,6 +7,8 @@
     
     <string name="choose_pic">选择图片</string>
     <string name="take_pic">拍照</string>
+    <string name="person_manager">Person管理</string>
+    <string name="group_manager">Group管理</string>
     
     <string name="pick_image_err">图片选取错误，请重新选择！</string>
     
@@ -14,5 +16,6 @@
     <string name="backe">返回</string>
     <string name="detect_face">人脸检测</string>
     <string name="upload_detect">上传检测</string>
+    <string name="msg_detecting">正在上传图片进行检测&#8230;</string>
 
 </resources>

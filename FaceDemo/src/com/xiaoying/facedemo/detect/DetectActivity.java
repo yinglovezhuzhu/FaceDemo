@@ -21,6 +21,7 @@ import org.json.JSONException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -66,15 +67,11 @@ public class DetectActivity extends Activity {
 	
 	private String tag = DetectActivity.class.getSimpleName();
 	
-	public static final float OUTER_WIDTH = 15f;
-	
-	public static final float INER_WIDTH = 4f;
-	
-	public static final float INER_OUTER_DIST = 5f;
-	
 	private TitleBar mTitleBar = null;
 	
 	private MarkFaceView mMarkView = null;
+	
+	private ProgressDialog mProgressDialog = null;
 	
 	private Bitmap mBitmap = null;
 	
@@ -100,6 +97,8 @@ public class DetectActivity extends Activity {
 		mBitmap = BitmapUtil.loadBitmap(mBitmapPath, m.widthPixels, m.heightPixels);
 		LogUtil.w(tag, "Bitmap size++++>>>(" + mBitmap.getWidth() + ", " + mBitmap.getHeight()  + ")");
 		mMarkView.setBitmap(mBitmap);
+		
+		initProgressDialog();
 	}
 	
 	
@@ -121,13 +120,24 @@ public class DetectActivity extends Activity {
 			public void onClick(View v) {
 				File file = new File(mBitmapPath);
 				if(FileUtil.getFileSize(mBitmapPath) < 3 * 1024 * 1024) {
-					new UploadImage(MainApplication.CLIENT).execute(file);
+					new DetectFace(MainApplication.CLIENT).execute(file);
 				} else {
 					Toast.makeText(DetectActivity.this, "图片不能大于3M", Toast.LENGTH_LONG).show();
 				}
 			}
 		});
+		mMarkView.setOnFaceClickListener(mFaceClickListener);
 	}
+	
+
+	MarkFaceView.OnFceClickListener mFaceClickListener = new MarkFaceView.OnFceClickListener() {
+		
+		@Override
+		public void onFaceClicked(Face face, int position) {
+			LogUtil.w(tag, "Position++++++++++>>>" + position);
+			LogUtil.w(tag, face);
+		}
+	};
 	
 	private void initData() {
 		Intent intent = getIntent();
@@ -138,35 +148,68 @@ public class DetectActivity extends Activity {
 			Toast.makeText(this, R.string.pick_image_err, Toast.LENGTH_SHORT).show();
 			finish();
 		}
-		getFaceset();
 	}
 	
+	private void initProgressDialog() {
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		mProgressDialog.setCancelable(true);
+	}
 	
-	private void getFaceset() {
+	private void showProgressDialog(CharSequence message) {
+		if(mProgressDialog == null) {
+			initProgressDialog();
+		}
+		mProgressDialog.setMessage(message);
+		mProgressDialog.show();
+	}
+	
+	private void dismissProgressDialog() {
+		if(mProgressDialog != null && mProgressDialog.isShowing()) {
+			mProgressDialog.dismiss();
+		}
+	}
+	
+	private Faceset getFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
 		List<Faceset> facesets = FacesetDBUtil.getFacesetsByKeyName(this, MainApplication.USER_NAME);
 		if(facesets.isEmpty()) {
-			createNewFaceset();
+			return createNewFaceset(service);
 		} else {
 			for (Faceset faceset : facesets) {
 				if(faceset.getFace_count() < RespConfig.FACESET_MAX_FACE) {
-					mFaceset = faceset;
-					break;
+					return faceset;
 				}
 			}
 			if(mFaceset == null) {
-				createNewFaceset();
+				return createNewFaceset(service);
 			}
 		}
+		return null;
 	}
 	
 	/**
 	 * 创建一个新的Faceset
+	 * @param service
 	 * @return
+	 * @throws ClientProtocolException
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JSONException
 	 */
-	private void createNewFaceset() {
+	private Faceset createNewFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
 		FacesetCreateReq req = new FacesetCreateReq(createNewFacesetName());
 		req.setTag("This is a faceset create by " + MainApplication.USER_NAME + " in " + DateUtil.getNowDate("yyyy-MM-dd HH:mm:ss"));
-		new CreateFacset().execute(req);
+		FacesetCreateResp resp = service.createFaceset(req);
+		if(resp != null && resp.getError_code() == RespConfig.RESP_OK) {
+			Faceset faceset = new Faceset();
+			faceset.setFaceset_id(resp.getFaceset_id());
+			faceset.setFaceset_name(resp.getFaceset_name());
+			faceset.setTag(resp.getTag());
+			faceset.setFace_count(resp.getAdded_face());
+			FacesetDBUtil.insertFaceset(this, faceset);
+			return faceset;
+		}
+		return null;
 	}
 	
 	/**
@@ -192,12 +235,18 @@ public class DetectActivity extends Activity {
 	 * @author xiaoying
 	 *
 	 */
-	private class UploadImage extends AsyncTask<File, Void, DetectResp> {
+	private class DetectFace extends AsyncTask<File, Void, DetectResp> {
 		
 		private Client mClient = null;
 		
-		public UploadImage(Client client) {
+		public DetectFace(Client client) {
 			this.mClient = client;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog(getResources().getString(R.string.msg_detecting));
 		}
 		
 		@Override
@@ -226,78 +275,23 @@ public class DetectActivity extends Activity {
 				LogUtil.i(tag, result);
 				if(result.getError_code() == RespConfig.RESP_OK) {
 					List<Face> faces = result.getFace();
-					mMarkView.markFaces(faces);
-					mMarkView.setOnFaceClickListener(new MarkFaceView.OnFceClickedListener() {
-						@Override
-						public void onFaceClicked(Face face, int position) {
-							LogUtil.w(tag, "Position++++++++++>>>" + position);
-							LogUtil.w(tag, face);
-						}
-					});
-					mImage.setImageId(result.getImg_id());
-					mImage.setImg(mBitmapPath);
-					mImage.setUrl(result.getUrl());
-					mImage.setWidth(result.getImg_width());
-					mImage.setHeight(result.getImg_height());
-					
-					new AddFaceToFaceset(faces).execute();
+					if(faces.isEmpty()) {
+						dismissProgressDialog();
+					} else {
+						mMarkView.markFaces(faces);
+						mImage.setImageId(result.getImg_id());
+						mImage.setImg(mBitmapPath);
+						mImage.setUrl(result.getUrl());
+						mImage.setWidth(result.getImg_width());
+						mImage.setHeight(result.getImg_height());
+						new AddFaceToFaceset(faces).execute();
+					}
 				} else {
 					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
+					dismissProgressDialog();
 				}
 			}
 		}
-	}
-	
-	
-	/**
-	 * 功能：创建一个新的Faceset
-	 * @author xiaoying
-	 *
-	 */
-	private class CreateFacset extends AsyncTask<FacesetCreateReq, Void, FacesetCreateResp> {
-
-		private FacesetService mmService = null;
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			mmService = new FacesetService(MainApplication.CLIENT);
-		}
-		
-		@Override
-		protected FacesetCreateResp doInBackground(FacesetCreateReq... params) {
-			try {
-				return mmService.createFaceset(params[0]);
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (ParseException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-		
-		@Override
-		protected void onPostExecute(FacesetCreateResp result) {
-			super.onPostExecute(result);
-			if(result != null) {
-				if(result.getError_code() == RespConfig.RESP_OK) {
-					Faceset faceset = new Faceset();
-					faceset.setFaceset_id(result.getFaceset_id());
-					faceset.setFaceset_name(result.getFaceset_name());
-					faceset.setTag(result.getTag());
-					faceset.setFace_count(result.getAdded_face());
-					FacesetDBUtil.insertFaceset(DetectActivity.this, faceset);
-					mFaceset = faceset;
-				} else {
-					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
-				}
-			}
-		}
-		
 	}
 	
 	/**
@@ -319,9 +313,13 @@ public class DetectActivity extends Activity {
 
 		@Override
 		protected FacesetAddFaceResp doInBackground(Void... params) {
-			FacesetAddFaceReq req = new FacesetAddFaceReq(mFaceset.getFaceset_id(), true);
-			req.setFace_id(makeFaceIds(mmFaces));
 			try {
+				mFaceset = getFaceset(mmService);
+				if(mFaceset == null) {
+					return null;
+				}
+				FacesetAddFaceReq req = new FacesetAddFaceReq(mFaceset.getFaceset_id(), true);
+				req.setFace_id(makeFaceIds(mmFaces));
 				return mmService.addFace(req);
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
@@ -351,6 +349,7 @@ public class DetectActivity extends Activity {
 					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
 			}
+			dismissProgressDialog();
 		}
 		
 		private String makeFaceIds(List<Face> faces) {

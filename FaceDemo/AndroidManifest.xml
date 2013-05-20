@@ -32,6 +32,14 @@
         <activity android:name="com.xiaoying.facedemo.detect.DetectActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.person.CreatePersonActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.person.PersonListActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

@@ -72,7 +72,7 @@ public class MarkFaceView extends FrameLayout {
 	/** 在显示出来的界面中，人脸的位置 */
 	private List<RectF> mRects = new ArrayList<RectF>();
 	
-	private MarkFaceView.OnFceClickedListener mListener;
+	private MarkFaceView.OnFceClickListener mListener;
 
 	public MarkFaceView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -282,7 +282,7 @@ public class MarkFaceView extends FrameLayout {
 	 * 设置人脸点击监听
 	 * @param listener
 	 */
-	public void setOnFaceClickListener(MarkFaceView.OnFceClickedListener listener) {
+	public void setOnFaceClickListener(MarkFaceView.OnFceClickListener listener) {
 		this.mListener = listener;
 	}
 	
@@ -362,7 +362,7 @@ public class MarkFaceView extends FrameLayout {
 	 * @author xiaoying
 	 *
 	 */
-	public static interface OnFceClickedListener {
+	public static interface OnFceClickListener {
 		public void onFaceClicked(Face face, int position);
 	}
 }
