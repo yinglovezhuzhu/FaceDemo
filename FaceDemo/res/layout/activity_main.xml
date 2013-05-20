@@ -1,38 +1,37 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="@color/white" >
+    android:background="@color/white"
+    android:orientation="vertical" >
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-       	android:layout_above="@+id/ll_bottom_tool_bar"
+        android:layout_weight="1"
         android:padding="8dip"
         android:src="@drawable/faceplusplus_logo"
         tools:ignore="ContentDescription" />
 
 	<LinearLayout 
 	    android:id="@+id/ll_bottom_tool_bar"
-	    android:padding="5dip"
-	    android:orientation="horizontal"
+	    android:orientation="vertical"
 	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_alignParentBottom="true">
+	    android:layout_height="match_parent"
+	    android:layout_weight="1" >
 	    <Button 
 	        android:id="@+id/btn_choose_pic"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
+	    	android:layout_margin="10dip"
 	        android:text="@string/choose_pic"
 	        android:background="@drawable/selector_btn"/>
 	    <Button 
 	        android:id="@+id/btn_take_pic"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
+	    	android:layout_margin="10dip"
 	        android:text="@string/take_pic"
 	        android:background="@drawable/selector_btn"/>
 	</LinearLayout>
-</RelativeLayout>
+</LinearLayout>

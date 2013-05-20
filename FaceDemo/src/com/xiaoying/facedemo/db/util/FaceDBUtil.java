@@ -28,7 +28,7 @@ import com.xiaoying.faceplusplus.api.entity.Face;
  * @author xiaoying
  */
 public class FaceDBUtil {
-//	db.execSQL("create table if not exists faces(face_id TEXT PRIMARY KEY, img_id TEXT, center_x REAL, center_y REAL, " +
+//	db.execSQL("create table if not exists faces(face_id TEXT PRIMARY KEY, face_data TEXT, img_id TEXT, center_x REAL, center_y REAL, " +
 //			"eye_left_x REAL, eye_left_y REAL, eye_right_x REAL, eye_right_y REAL, nose_x REAL, nose_y REAL, " +
 //			"mouth_left_x REAL, mouth_left_y REAL, mouth_right_x REAL, mouth_right_y REAL, width REAL, height REAL, " +
 //			"age_value INTEGER, age_range INTEGER, gender_value TEXT, gender_confidence REAL, race_value TEXT, " +
@@ -85,7 +85,7 @@ public class FaceDBUtil {
 			if(cursor.moveToFirst()) {
 				face = new Face();
 				int [] indexs = getIndexs(cursor);
-				setValues(cursor, indexs, face);
+				getValues(cursor, indexs, face);
 			}
 			cursor.close();
 		}
@@ -109,7 +109,7 @@ public class FaceDBUtil {
 				Face face = null;
 				do {
 					face = new Face();
-					setValues(cursor, indexs, face);
+					getValues(cursor, indexs, face);
 				} while(cursor.moveToNext());
 			}
 			cursor.close();
@@ -159,58 +159,61 @@ public class FaceDBUtil {
 		return count;
 	}
 	
-	private static void setValues(Cursor c, int [] indexs, Face face) {
+	private static void getValues(Cursor c, int [] indexs, Face face) {
 		face.setFace_id(c.getString(indexs[0]));
-		face.setImg_id(c.getString(indexs[1]));
-		face.setCenter(new PointF(c.getFloat(indexs[2]), c.getFloat(indexs[3])));
-		face.setEye_left(new PointF(c.getFloat(indexs[4]), c.getFloat(indexs[5])));
-		face.setEye_right(new PointF(c.getFloat(indexs[6]), c.getFloat(indexs[7])));
-		face.setNose(new PointF(c.getFloat(indexs[8]), c.getFloat(indexs[9])));
-		face.setMouth_left(new PointF(c.getFloat(indexs[10]), c.getFloat(indexs[11])));
-		face.setMouth_right(new PointF(c.getFloat(indexs[12]), c.getFloat(indexs[13])));
-		face.setWidth(c.getFloat(indexs[14]));
-		face.setHeight(c.getFloat(indexs[15]));
+		face.setFace_data(c.getString(indexs[1]));
+		face.setImg_id(c.getString(indexs[2]));
+		face.setCenter(new PointF(c.getFloat(indexs[3]), c.getFloat(indexs[4])));
+		face.setEye_left(new PointF(c.getFloat(indexs[5]), c.getFloat(indexs[6])));
+		face.setEye_right(new PointF(c.getFloat(indexs[7]), c.getFloat(indexs[8])));
+		face.setNose(new PointF(c.getFloat(indexs[9]), c.getFloat(indexs[10])));
+		face.setMouth_left(new PointF(c.getFloat(indexs[11]), c.getFloat(indexs[12])));
+		face.setMouth_right(new PointF(c.getFloat(indexs[13]), c.getFloat(indexs[14])));
+		face.setWidth(c.getFloat(indexs[15]));
+		face.setHeight(c.getFloat(indexs[16]));
 		Face.Age age = new Face.Age();
-		age.setValue(c.getInt(indexs[16]));
-		age.setRange(c.getInt(indexs[17]));
+		age.setValue(c.getInt(indexs[17]));
+		age.setRange(c.getInt(indexs[18]));
 		Face.Gender gender = new Face.Gender();
-		gender.setValue(c.getString(indexs[18]));
-		gender.setConfidence(c.getFloat(indexs[19]));
+		gender.setValue(c.getString(indexs[19]));
+		gender.setConfidence(c.getFloat(indexs[20]));
 		Face.Race race = new Face.Race();
-		race.setValue(c.getString(indexs[20]));
-		race.setConfidence(c.getFloat(indexs[21]));
+		race.setValue(c.getString(indexs[21]));
+		race.setConfidence(c.getFloat(indexs[22]));
 	}
 	
 	private static int [] getIndexs(Cursor c) throws SQLiteException {
 		int [] indexs = new int[22];
 		indexs[0] = c.getColumnIndex("face_id");
-		indexs[1] = c.getColumnIndex("img_id");
-		indexs[2] = c.getColumnIndex("center_x");
-		indexs[3] = c.getColumnIndex("center_y");
-		indexs[4] = c.getColumnIndex("eye_left_x");
-		indexs[5] = c.getColumnIndex("eye_left_y");
-		indexs[6] = c.getColumnIndex("eye_right_x");
-		indexs[7] = c.getColumnIndex("eye_right_y");
-		indexs[8] = c.getColumnIndex("nose_x");
-		indexs[9] = c.getColumnIndex("nose_y");
-		indexs[10] = c.getColumnIndex("mouth_left_x");
-		indexs[11] = c.getColumnIndex("mouth_left_y");
-		indexs[12] = c.getColumnIndex("mouth_right_x");
-		indexs[13] = c.getColumnIndex("mouth_right_y");
-		indexs[14] = c.getColumnIndex("width");
-		indexs[15] = c.getColumnIndex("height");
-		indexs[16] = c.getColumnIndex("age_value");
-		indexs[17] = c.getColumnIndex("age_range");
-		indexs[18] = c.getColumnIndex("gender_value");
-		indexs[19] = c.getColumnIndex("gender_confidence");
-		indexs[20] = c.getColumnIndex("race_value");
-		indexs[21] = c.getColumnIndex("race_confidence");
+		indexs[1] = c.getColumnIndex("face_data");
+		indexs[2] = c.getColumnIndex("img_id");
+		indexs[3] = c.getColumnIndex("center_x");
+		indexs[4] = c.getColumnIndex("center_y");
+		indexs[5] = c.getColumnIndex("eye_left_x");
+		indexs[6] = c.getColumnIndex("eye_left_y");
+		indexs[7] = c.getColumnIndex("eye_right_x");
+		indexs[8] = c.getColumnIndex("eye_right_y");
+		indexs[9] = c.getColumnIndex("nose_x");
+		indexs[10] = c.getColumnIndex("nose_y");
+		indexs[11] = c.getColumnIndex("mouth_left_x");
+		indexs[12] = c.getColumnIndex("mouth_left_y");
+		indexs[13] = c.getColumnIndex("mouth_right_x");
+		indexs[14] = c.getColumnIndex("mouth_right_y");
+		indexs[15] = c.getColumnIndex("width");
+		indexs[16] = c.getColumnIndex("height");
+		indexs[17] = c.getColumnIndex("age_value");
+		indexs[18] = c.getColumnIndex("age_range");
+		indexs[19] = c.getColumnIndex("gender_value");
+		indexs[20] = c.getColumnIndex("gender_confidence");
+		indexs[21] = c.getColumnIndex("race_value");
+		indexs[22] = c.getColumnIndex("race_confidence");
 		return indexs;
 		
 	}
 	
 	private static void setValues(ContentValues values, Face face) {
 		values.put("face_id", face.getFace_id());
+		values.put("face_data", face.getFace_data());
 		values.put("img_id", face.getImg_id());
 		PointF center = face.getCenter();
 		values.put("center_x", center.x);

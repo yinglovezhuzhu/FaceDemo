@@ -19,6 +19,7 @@ import android.graphics.PointF;
 public class Face {
 	// face array 被检测出的人脸的列表
 	private String face_id; //被检测出的每一张人脸都在Face++系统中的标识符
+	private String face_data; //人脸本地截图的路径，如果有的话，没有为空
 	private String img_id; //人脸相关的图片id
 	private String url;	//相关图片的url
 	
@@ -54,6 +55,24 @@ public class Face {
 	 */
 	public void setFace_id(String face_id) {
 		this.face_id = face_id;
+	}
+	
+	
+
+	/**
+	 * 人脸本地截图的路径，如果有的话，没有为空
+	 * @return the face_data
+	 */
+	public String getFace_data() {
+		return face_data;
+	}
+
+	/**
+	 * 人脸本地截图的路径，如果有的话，没有为空
+	 * @param face_data the face_data to set
+	 */
+	public void setFace_data(String face_data) {
+		this.face_data = face_data;
 	}
 
 	/**
@@ -264,14 +283,18 @@ public class Face {
 	
 	
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
-		return "Face [face_id=" + face_id + ", img_id=" + img_id + ", url="
-				+ url + ", width=" + width + ", height=" + height + ", center="
-				+ center + ", eye_left=" + eye_left + ", eye_right="
-				+ eye_right + ", mouth_left=" + mouth_left + ", mouth_right="
-				+ mouth_right + ", nose=" + nose + ", gender=" + gender
-				+ ", age=" + age + ", race=" + race + ", tag=" + tag + "]";
+		return "Face [face_id=" + face_id + ", face_data=" + face_data
+				+ ", img_id=" + img_id + ", url=" + url + ", width=" + width
+				+ ", height=" + height + ", center=" + center + ", eye_left="
+				+ eye_left + ", eye_right=" + eye_right + ", mouth_left="
+				+ mouth_left + ", mouth_right=" + mouth_right + ", nose="
+				+ nose + ", gender=" + gender + ", age=" + age + ", race="
+				+ race + ", tag=" + tag + "]";
 	}
 
 	/**

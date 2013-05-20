@@ -94,6 +94,8 @@ public class FaceService extends BaseService {
 				faceObj = faceArray.optJSONObject(i);
 				face = new Face();
 				face.setFace_id(faceObj.optString("face_id"));
+				face.setImg_id(result.getImg_id());
+				face.setUrl(result.getUrl());
 				face.setTag(faceObj.optString("tag"));
 				setAttribute(faceObj.optJSONObject("attribute"), face);
 				setPosition(faceObj.optJSONObject("position"), face);

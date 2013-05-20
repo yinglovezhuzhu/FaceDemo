@@ -1,4 +1,13 @@
-
+/*
+ * 文件名：DetectActivity.java
+ * 版权：<版权>
+ * 描述：<描述>
+ * 创建人：xiaoying
+ * 创建时间：2013-5-17
+ * 修改人：xiaoying
+ * 修改时间：2013-5-17
+ * 版本：v1.0
+ */
 package com.xiaoying.facedemo.detect;
 
 import java.io.File;
@@ -12,20 +21,11 @@ import org.json.JSONException;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.PointF;
-import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.xiaoying.facedemo.MainActivity;
@@ -34,6 +34,7 @@ import com.xiaoying.facedemo.R;
 import com.xiaoying.facedemo.utils.BitmapUtil;
 import com.xiaoying.facedemo.utils.FileUtil;
 import com.xiaoying.facedemo.utils.LogUtil;
+import com.xiaoying.facedemo.widget.MarkFaceView;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.cliet.Client;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
@@ -42,6 +43,11 @@ import com.xiaoying.faceplusplus.api.entity.request.face.DetectReq;
 import com.xiaoying.faceplusplus.api.entity.response.face.DetectResp;
 import com.xiaoying.faceplusplus.api.service.FaceService;
 
+/**
+ * 功能：人脸识别的Activity
+ * @author xiaoying
+ *
+ */
 public class DetectActivity extends Activity {
 	
 	private String tag = DetectActivity.class.getSimpleName();
@@ -52,24 +58,15 @@ public class DetectActivity extends Activity {
 	
 	public static final float INER_OUTER_DIST = 5f;
 	
-	/** 内框和外框的间距 */
-	private float mIODist = 8f;
-
 	private TitleBar mTitleBar = null;
 	
-	private ImageView mImageView = null;
+	private MarkFaceView mMarkView = null;
 	
 	private Bitmap mBitmap = null;
 	
 	private int mInSampleSize = 1;
 	
 	private String mBitmapPath = null;
-	
-	private float mOuterWidth = OUTER_WIDTH;
-	/** 框透明度 */
-	private int mAlpha = 130;
-	/** 框颜色 */
-	private int mBorderColor = Color.argb(mAlpha, 0x00, 0x9A, 0xD6);
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -86,20 +83,17 @@ public class DetectActivity extends Activity {
 		
 		mInSampleSize = BitmapUtil.calculateInSampleSize(mBitmapPath, m.widthPixels, m.heightPixels);
 		
-		Bitmap bitmap = BitmapUtil.loadBitmap(mBitmapPath, mInSampleSize);
-		mBitmap = bitmap.copy(Config.ARGB_8888, true);
-		bitmap.recycle();
-		
+		mBitmap = BitmapUtil.loadBitmap(mBitmapPath, mInSampleSize);
 		LogUtil.w(tag, "Bitmap size++++>>>(" + mBitmap.getWidth() + ", " + mBitmap.getHeight()  + ")");
-		
-		mImageView.setImageBitmap(mBitmap);
-		
+		mMarkView.setBitmap(mBitmap);
 	}
 	
 	
 	private void initView() {
 		mTitleBar = (TitleBar) findViewById(R.id.tb_title);
-		mImageView = (ImageView) findViewById(R.id.iv_image);
+		
+		mMarkView = (MarkFaceView) findViewById(R.id.mfv_mark_face);
+		
 		
 		mTitleBar.setTitle(R.string.detect_face);
 		mTitleBar.setLeftButton(R.string.backe, new View.OnClickListener() {
@@ -114,7 +108,6 @@ public class DetectActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				File file = new File(mBitmapPath);
 				if(FileUtil.getFileSize(mBitmapPath) < 3 * 1024 * 1024) {
 					Client client = new Client(MainApplication.APP_KEY, MainApplication.APP_SECRET);
@@ -182,21 +175,14 @@ public class DetectActivity extends Activity {
 				LogUtil.i(tag, result);
 				if(result.getError_code() == RespConfig.RESP_OK) {
 					List<Face> faces = result.getFace();
-					Canvas canvas = new Canvas(mBitmap);
-					Paint paint = new Paint();
-					paint.setColor(mBorderColor);
-					paint.setStyle(Style.STROKE);
-					paint.setStrokeWidth(getStrokeWidth(mBitmap, mImageView, OUTER_WIDTH));
-					Log.e("BBBB", "Stroke width+++++>>>" + paint.getStrokeWidth());
-					canvas.drawBitmap(mBitmap, 0, 0, paint);
-					int width = mBitmap.getWidth();
-					int height = mBitmap.getHeight();
-					for (Face face : faces) {
-						LogUtil.w(tag, face);
-						drawOuterRect(canvas, paint, face, width, height);
-						drawInerRect(canvas, paint, face, width, height);
-					}
-					mImageView.setImageBitmap(mBitmap);
+					mMarkView.markFaces(faces);
+					mMarkView.setOnFaceClickListener(new MarkFaceView.OnFceClickedListener() {
+						@Override
+						public void onFaceClicked(Face face, int position) {
+							LogUtil.w(tag, "Position++++++++++>>>" + position);
+							LogUtil.w(tag, face);
+						}
+					});
 				} else {
 					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
@@ -204,78 +190,4 @@ public class DetectActivity extends Activity {
 		}
 	}
 	
-	private void drawOuterRect(Canvas canvas, Paint paint, Face face, int bmWidth, int bmHeight) {
-		PointF center = face.getCenter();
-		float width = face.getWidth();
-		float height = face.getHeight();
-//		PointF eyeLeft = face.getEye_left();
-//		canvas.drawPoint(bmWidth * (eyeLeft.x / 100), bmHeight * (eyeLeft.y / 100), paint);
-//		PointF eyeRight = face.getEye_right();
-//		canvas.drawPoint(bmWidth * (eyeRight.x / 100), bmHeight * (eyeRight.y / 100), paint);
-		paint.setStrokeWidth(OUTER_WIDTH * getScale(mBitmap, mImageView));
-		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) - paint.getStrokeWidth();
-		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) - paint.getStrokeWidth();
-		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) + paint.getStrokeWidth();
-		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) + paint.getStrokeWidth();
-		RectF rect = new RectF(left, top, right, bottom);
-		canvas.drawRect(rect, paint);
-	}
-	
-	private void drawInerRect(Canvas canvas, Paint paint, Face face, int bmWidth, int bmHeight) {
-		PointF center = face.getCenter();
-		float width = face.getWidth();
-		float height = face.getHeight();
-		paint.setStrokeWidth(INER_WIDTH * getScale(mBitmap, mImageView));
-		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) + mIODist;
-		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) + mIODist;
-		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) - mIODist;
-		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) - mIODist;
-		
-		float inerLength = (right - left) / 3;
-		float [] points = {
-				left, top, left + inerLength, top, 
-				left, top, left, top + inerLength, 
-				right - inerLength, top, right, top, 
-				right, top, right, top + inerLength, 
-				left, bottom - inerLength, left, bottom, 
-				left, bottom, left + inerLength, bottom,
-				right - inerLength, bottom, right, bottom, 
-				right, bottom - inerLength, right, bottom,
-		};
-		canvas.drawLines(points, paint);
-	}
-	
-	
-	private float getStrokeWidth(final Bitmap bm, ImageView iv, float real) {
-		int ivWidth = iv.getWidth();
-		int ivHeight = iv.getHeight();
-		int bmWidth = bm.getWidth();
-		int bmHeight = bm.getHeight();
-		if(ivWidth > bmWidth && ivHeight > bmHeight) {
-			return real;
-		}
-		float wScale = (float)bmWidth / ivWidth;
-		float hScale = (float) bmHeight / ivHeight;
-		float scale = wScale < hScale ? wScale : hScale;
-		return real * scale;
-	}
-	
-	/**
-	 * 计算Bitmap跟显示在ImageView中的倍数
-	 * @param bm
-	 * @param iv
-	 * @return
-	 */
-	private float getScale(final Bitmap bm, final ImageView iv) {
-		int ivWidth = iv.getWidth();
-		int ivHeight = iv.getHeight();
-		int bmWidth = bm.getWidth();
-		int bmHeight = bm.getHeight();
-		if(ivWidth > bmWidth && ivHeight > bmHeight) {
-			return 1f;
-		}
-		float wScale = (float)bmWidth / ivWidth;
-		float hScale = (float) bmHeight / ivHeight;
-		return wScale < hScale ? wScale : hScale;
-	}
 }
