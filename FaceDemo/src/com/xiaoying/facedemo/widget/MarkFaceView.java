@@ -41,16 +41,6 @@ public class MarkFaceView extends FrameLayout {
 	private String tag = MarkFaceView.class.getSimpleName();
 	/** 显示图片的ImageView */
 	private ImageView mImageView = null;
-	/** Bitmap对象，当调用setBitmap(Bitmap bitmap)方法时，或将参数中的bitmap复制到这个对象中，并且是Mutable的 */
-	private Bitmap mBitmap = null;
-	/** 画布 */
-	private Canvas mCanvas = new Canvas();
-	
-	private Paint mPaint = new Paint();
-	/** 人脸信息 */
-	private List<Face> mFaces = null;
-	/** 在显示出来的界面中，人脸的位置 */
-	private List<RectF> mRects = new ArrayList<RectF>();
 	/** Bitmap显示的左边缘 */
 	private float mImageLeft = getLeft();
 	/** Bitmap显示的上边缘 */
@@ -62,7 +52,7 @@ public class MarkFaceView extends FrameLayout {
 	/** 外框宽度 **/
 	private float mOuterBorderWidth = 8f;
 	/** 内框宽度 **/
-	private float mInerBorderWidth = 2f;
+	private float mInnerBorderWidth = 2f;
 	/** 内外框距离 **/
 	private float mIODist = 5f;
 	/** 框透明度 */
@@ -71,6 +61,16 @@ public class MarkFaceView extends FrameLayout {
 	private int mBorderColor = Color.argb(mAlpha, 0x00, 0x9A, 0xD6);
 	/** Bitmap显示和实际的缩放比例 */
 	private float mScale = 1.0f;
+	/** Bitmap对象，当调用setBitmap(Bitmap bitmap)方法时，或将参数中的bitmap复制到这个对象中，并且是Mutable的 */
+	private Bitmap mBitmap = null;
+	/** 画布 */
+	private Canvas mCanvas = new Canvas();
+	
+	private Paint mPaint = new Paint();
+	/** 人脸信息 */
+	private List<Face> mFaces = null;
+	/** 在显示出来的界面中，人脸的位置 */
+	private List<RectF> mRects = new ArrayList<RectF>();
 	
 	private MarkFaceView.OnFceClickedListener mListener;
 
@@ -156,13 +156,13 @@ public class MarkFaceView extends FrameLayout {
 		int bmWidth = mBitmap.getWidth();
 		int bmHeight = mBitmap.getHeight();
 		mOuterBorderWidth = getStrokeWidth(bmWidth, bmHeight, mOuterBorderWidth);
-		mInerBorderWidth = getStrokeWidth(bmWidth, bmHeight, mInerBorderWidth);
+		mInnerBorderWidth = getStrokeWidth(bmWidth, bmHeight, mInnerBorderWidth);
 		mPaint.setColor(mBorderColor);
 		mPaint.setStyle(Style.STROKE);
 		for (Face face : faces) {
 			mPaint.setStrokeWidth(mOuterBorderWidth);
 			drawOuterRect(mCanvas, mPaint, face, bmWidth, bmHeight);
-			mPaint.setStrokeWidth(mInerBorderWidth);
+			mPaint.setStrokeWidth(mInnerBorderWidth);
 			drawInerRect(mCanvas, mPaint, face, bmWidth, bmHeight);
 		}
 		mImageView.setImageBitmap(mBitmap);
@@ -245,11 +245,94 @@ public class MarkFaceView extends FrameLayout {
 		float scale = wScale < hScale ? wScale : hScale;
 		return real * scale;
 	}
+
+	/**
+	 * 设置外框宽度
+	 * @param width
+	 */
+	public void setOuterBorderWidth(float width) {
+		this.mOuterBorderWidth = width;
+	}
 	
+	/**
+	 * 获取外框宽度
+	 * @return
+	 */
+	public float getOuterBorderWidth() {
+		return mOuterBorderWidth;
+	}
+	
+	/**
+	 * 设置内边框宽度
+	 * @param width
+	 */
+	public void setInnerBorderWidth(float width) {
+		this.mInnerBorderWidth = width;
+	}
+	
+	/**
+	 * 获取内边框宽度
+	 * @return
+	 */
+	public float getInnerBorderWidth() {
+		return mInnerBorderWidth;
+	}
+	
+	/**
+	 * 设置人脸点击监听
+	 * @param listener
+	 */
 	public void setOnFaceClickListener(MarkFaceView.OnFceClickedListener listener) {
 		this.mListener = listener;
 	}
 	
+	/**
+	 * 设置边框绘制的透明度
+	 * @param alpha
+	 */
+	public void setBorderAlpha(int alpha) {
+		this.mAlpha = alpha;
+	}
+	
+	/**
+	 * 获取边框的透明度
+	 * @return
+	 */
+	public int getBorderAlpha() {
+		return mAlpha;
+	}
+	
+	/**
+	 * 设置边框颜色
+	 * @param color
+	 */
+	public void setBorderColor(int color) {
+		mBorderColor = Color.argb(mAlpha, Color.red(color), Color.green(color), Color.blue(color));
+	}
+	
+	/**
+	 * 获取边框颜色
+	 * @return
+	 */
+	public int getBorderColor() {
+		return mBorderColor;
+	}
+	
+	/**
+	 * 设置内外边框的距离
+	 * @param dist
+	 */
+	public void setIODist(float dist) {
+		this.mIODist = dist;
+	}
+	
+	/**
+	 * 获取内外边框的距离
+	 * @return
+	 */
+	public float getIODist() {
+		return mIODist;
+	}
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
