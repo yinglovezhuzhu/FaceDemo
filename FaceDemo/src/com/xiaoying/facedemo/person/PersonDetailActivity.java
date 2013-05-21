@@ -10,10 +10,10 @@
  */
 package com.xiaoying.facedemo.person;
 
-import com.xiaoying.facedemo.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import com.xiaoying.facedemo.R;
 
 /**
  * 功能：Person详情

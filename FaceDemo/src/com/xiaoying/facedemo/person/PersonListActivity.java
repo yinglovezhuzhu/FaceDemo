@@ -39,7 +39,6 @@ import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.entity.Person;
 import com.xiaoying.faceplusplus.api.entity.request.person.PersonDeleteReq;
-import com.xiaoying.faceplusplus.api.entity.request.person.PersonSetInfoReq;
 import com.xiaoying.faceplusplus.api.entity.response.info.InfoGetPersonListResp;
 import com.xiaoying.faceplusplus.api.entity.response.person.PersonDeleteResp;
 import com.xiaoying.faceplusplus.api.service.InfoService;

@@ -1,9 +1,10 @@
 
 package com.xiaoying.facedemo.utils;
 
-import android.annotation.SuppressLint;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import android.annotation.SuppressLint;
 
 
 public class StringUtil {

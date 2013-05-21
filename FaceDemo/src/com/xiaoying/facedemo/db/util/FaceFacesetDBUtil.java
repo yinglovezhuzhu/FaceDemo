@@ -13,13 +13,13 @@ package com.xiaoying.facedemo.db.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.xiaoying.facedemo.db.DBHelper;
-import com.xiaoying.faceplusplus.api.entity.Face;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+
+import com.xiaoying.facedemo.db.DBHelper;
+import com.xiaoying.faceplusplus.api.entity.Face;
 
 /**
  * 功能：把Face添加到Faceset数据操作工具类
