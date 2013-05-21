@@ -20,6 +20,7 @@ public class Group {
 	private String group_id;	//相应group的id
 	private String group_name;	//相应group的name
 	private String tag;	//group相关的tag
+	private int person_count;	//Group包含的Person个数
 	private List<Person> person;	//属于该group的person信息
 	
 	/**
@@ -71,6 +72,22 @@ public class Group {
 	}
 	
 	/**
+	 * 
+	 * @return the person_count
+	 */
+	public int getPerson_count() {
+		return person_count;
+	}
+
+	/**
+	 * 
+	 * @param person_count the person_count to set
+	 */
+	public void setPerson_count(int person_count) {
+		this.person_count = person_count;
+	}
+
+	/**
 	 * 属于该group的person信息
 	 * @return
 	 */
@@ -86,9 +103,15 @@ public class Group {
 		this.person = person;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return "Group [group_id=" + group_id + ", group_name=" + group_name
-				+ ", tag=" + tag + ", person=" + person + "]";
+				+ ", tag=" + tag + ", person_count=" + person_count
+				+ ", person=" + person + ", getClass()=" + getClass()
+				+ ", hashCode()=" + hashCode() + ", toString()="
+				+ super.toString() + "]";
 	}
 }

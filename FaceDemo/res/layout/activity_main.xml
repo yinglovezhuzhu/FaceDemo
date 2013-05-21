@@ -57,5 +57,12 @@
 		        android:text="@string/group_manager"
 		        android:background="@drawable/selector_btn"/>
 	    </LinearLayout>
+	    <Button 
+	        android:id="@+id/btn_faceset_manager"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	    	android:layout_margin="10dip"
+	        android:text="@string/faceset_manager"
+	        android:background="@drawable/selector_btn"/>
 	</LinearLayout>
 </RelativeLayout>

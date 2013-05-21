@@ -9,6 +9,7 @@
     <string name="take_pic">拍照</string>
     <string name="person_manager">Person管理</string>
     <string name="group_manager">Group管理</string>
+    <string name="faceset_manager">Faceset管理</string>
     
     <string name="pick_image_err">图片选取错误，请重新选择！</string>
     
@@ -17,5 +18,26 @@
     <string name="detect_face">人脸检测</string>
     <string name="upload_detect">上传检测</string>
     <string name="msg_detecting">正在上传图片进行检测&#8230;</string>
-
+    
+    <!-- Person -->
+    <string name="choose_person">选择Person</string>
+    
+    <!-- group -->
+	<string name="create">新建</string>
+	<string name="msg_getting_data">正在获取数据&#8230;</string>
+	<string name="no_data">无相关数据！</string>
+	<string name="choose_group">选择Group</string>
+	
+	<string name="name">名称</string>
+	<string name="tag">说明</string>
+	<string name="submit">提交</string>
+	<string name="cancel">取消</string>
+	<string name="ok">确定</string>
+	<string name="submiting_data">正在提交数据，请稍候&#8230;</string>
+	<string name="sys_err">系统错误</string>
+	
+	<!-- Faceset -->
+	<string name="create_faceset">新增Faceset</string>
+	<string name="modify_faceset">修改Faceset</string>
+	
 </resources>

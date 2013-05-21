@@ -214,7 +214,7 @@ public class MarkFaceView extends FrameLayout {
 	
 	
 	private float [] getInerPoints(float left, float top, float right, float bottom) {
-		float inerLength = (right - left) / 3;
+		float inerLength = (right - left) / 4;
 		return new float [] {
 				left, top, left + inerLength, top, 
 				left, top, left, top + inerLength, 

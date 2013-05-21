@@ -40,6 +40,34 @@
         <activity android:name="com.xiaoying.facedemo.person.PersonListActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.person.PersonDetailActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.group.CreateGroupActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.group.GroupListActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.group.GroupDetailActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.faceset.FacesetListActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.faceset.CreateFacesetActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
+        
+        <activity android:name="com.xiaoying.facedemo.faceset.FacesetDetailActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

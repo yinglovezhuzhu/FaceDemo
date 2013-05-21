@@ -218,7 +218,7 @@ public class DetectActivity extends Activity {
 	 */
 	@SuppressLint("SimpleDateFormat")
 	private String createNewFacesetName() {
-		return  MainApplication.USER_NAME + "_" + DateUtil.getNowDate("yyyy-MM-dd_HHmmss");
+		return  MainApplication.USER_NAME + "_Faceset_" + DateUtil.getNowDate("yyyy-MM-dd_HHmmss");
 	}
 	
 	@Override

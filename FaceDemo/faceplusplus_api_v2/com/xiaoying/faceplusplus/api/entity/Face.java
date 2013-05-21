@@ -10,13 +10,19 @@
  */
 package com.xiaoying.faceplusplus.api.entity;
 
+import java.io.Serializable;
+
 import android.graphics.PointF;
 
 /**
  * 功能：人脸实体类
  * @author xiaoying
  */
-public class Face {
+public class Face implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8603825983713166688L;
 	// face array 被检测出的人脸的列表
 	private String face_id; //被检测出的每一张人脸都在Face++系统中的标识符
 	private String face_data; //人脸本地截图的路径，如果有的话，没有为空

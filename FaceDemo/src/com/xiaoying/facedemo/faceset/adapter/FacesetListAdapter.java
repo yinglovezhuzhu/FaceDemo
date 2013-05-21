@@ -1,14 +1,15 @@
 /*
- * 文件名：GroupListAdapter.java
+ * 文件名：FacesetListAdapter.java
  * 版权：<版权>
  * 描述：<描述>
  * 创建人：xiaoying
- * 创建时间：2013-5-20
+ * 创建时间：2013-5-21
  * 修改人：xiaoying
- * 修改时间：2013-5-20
+ * 修改时间：2013-5-21
  * 版本：v1.0
  */
-package com.xiaoying.facedemo.group.adapter;
+
+package com.xiaoying.facedemo.faceset.adapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,55 +22,56 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.xiaoying.facedemo.R;
-import com.xiaoying.faceplusplus.api.entity.Group;
+import com.xiaoying.faceplusplus.api.entity.Faceset;
 
 /**
- * 功能：Group列表适配器
+ * 功能：Faceset列表适配器
  * @author xiaoying
+ *
  */
-public class GroupListAdapter extends BaseAdapter {
-	
+public class FacesetListAdapter extends BaseAdapter {
+
 	private Context mContext = null;
 	
-	private List<Group> mGroups = new ArrayList<Group>();
+	private List<Faceset> mFacesets = new ArrayList<Faceset>();
 	
-	public GroupListAdapter(Context context) {
+	public FacesetListAdapter(Context context) {
 		this.mContext = context;
 	}
 	
-	public void add(Group group) {
-		mGroups.add(group);
+	public void add(Faceset faceset) {
+		mFacesets.add(faceset);
 		notifyDataSetChanged();
 	}
 	
-	public void addAll(List<Group> groups) {
-		mGroups.addAll(groups);
+	public void addAll(List<Faceset> facesets) {
+		mFacesets.addAll(facesets);
 		notifyDataSetChanged();
 	}
 	
 	public void remove(int position) {
-		mGroups.remove(position);
+		mFacesets.remove(position);
 		notifyDataSetChanged();
 	}
 	
 	public void remove(Object object) {
-		mGroups.remove(object);
+		mFacesets.remove(object);
 		notifyDataSetChanged();
 	}
 	
 	public void clear() {
-		mGroups.clear();
+		mFacesets.clear();
 		notifyDataSetChanged();
 	}
 
 	@Override
 	public int getCount() {
-		return mGroups.size();
+		return mFacesets.size();
 	}
 
 	@Override
-	public Group getItem(int position) {
-		return mGroups.get(position);
+	public Faceset getItem(int position) {
+		return mFacesets.get(position);
 	}
 
 	@Override
@@ -91,11 +93,11 @@ public class GroupListAdapter extends BaseAdapter {
 		} else {
 			viewHoder = (ViewHoder) convertView.getTag();
 		}
-		Group group = getItem(position);
+		Faceset faceset = getItem(position);
 		viewHoder.icon.setImageResource(R.drawable.ic_launcher);
-		viewHoder.text1.setText(group.getGroup_name());
-		viewHoder.text2.setText(group.getGroup_id());
-		viewHoder.text3.setText(group.getTag());
+		viewHoder.text1.setText(faceset.getFaceset_name());
+		viewHoder.text2.setText(faceset.getFaceset_id());
+		viewHoder.text3.setText(faceset.getTag());
 		return convertView;
 	}
 

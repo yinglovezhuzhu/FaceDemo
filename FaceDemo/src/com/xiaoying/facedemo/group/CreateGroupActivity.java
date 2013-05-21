@@ -19,7 +19,7 @@ import android.os.Bundle;
  * 功能：创建Group
  * @author xiaoying
  */
-public class CreatePersonActivity extends Activity {
+public class CreateGroupActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

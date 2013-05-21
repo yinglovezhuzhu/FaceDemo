@@ -9,11 +9,18 @@
  * 版本：v1.0
  */
 package com.xiaoying.faceplusplus.api.entity;
+
+import java.io.Serializable;
+
 /**
  * 功能：图片实体类
  * @author xiaoying
  */
-public class Image {
+public class Image implements Serializable {
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4819969692048074149L;
 //	img_id TEXT PRIMARY KEY, img TEXT, url TEXT, width INTEGER, height INTEGER
 	private String imageId;
 	private String img;

@@ -11,6 +11,7 @@
 
 package com.xiaoying.faceplusplus.api.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -18,7 +19,11 @@ import java.util.List;
  * @author xiaoying
  *
  */
-public class Faceset {
+public class Faceset implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2977773864016787357L;
 	private String faceset_name;	//相应Faceset的name
 	private String faceset_id;	//相应Faceset的id
 	private String tag;	//Faceset相关的tag

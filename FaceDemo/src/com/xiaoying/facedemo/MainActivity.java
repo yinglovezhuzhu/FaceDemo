@@ -14,6 +14,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.xiaoying.facedemo.detect.DetectActivity;
+import com.xiaoying.facedemo.faceset.FacesetListActivity;
+import com.xiaoying.facedemo.group.GroupListActivity;
+import com.xiaoying.facedemo.person.PersonListActivity;
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.utils.StringUtil;
 
@@ -37,6 +40,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		
 		findViewById(R.id.btn_choose_pic).setOnClickListener(this);
 		findViewById(R.id.btn_take_pic).setOnClickListener(this);
+		findViewById(R.id.btn_person_manager).setOnClickListener(this);
+		findViewById(R.id.btn_group_manager).setOnClickListener(this);
+		findViewById(R.id.btn_faceset_manager).setOnClickListener(this);
 	}
 	
 	@Override
@@ -101,6 +107,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		startActivity(intent);
 	}
 	
+	private void gotoPersonManager() {
+		Intent intent = new Intent(this, PersonListActivity.class);
+		intent.putExtra(PersonListActivity.EXTRA_MODE, PersonListActivity.MODE_VIEW);
+		startActivity(intent);
+	}
+	
+	private void gotoGroupManager() {
+		Intent intent = new Intent(this, GroupListActivity.class);
+		intent.putExtra(GroupListActivity.EXTRA_MODE, GroupListActivity.MODE_VIEW);
+		startActivity(intent);
+	}
+	
+	private void gotoFacesetManager() {
+		Intent intent = new Intent(this, FacesetListActivity.class);
+		intent.putExtra(FacesetListActivity.EXTRA_MODE, FacesetListActivity.MODE_VIEW);
+		startActivity(intent);
+	}
+	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -109,6 +133,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
 				break;
 			case R.id.btn_take_pic:
 				takePic();
+				break;
+			case R.id.btn_person_manager:
+				gotoPersonManager();
+				break;
+			case R.id.btn_group_manager:
+				gotoGroupManager();
+				break;
+			case R.id.btn_faceset_manager:
+				gotoFacesetManager();
 				break;
 			default :
 				break;

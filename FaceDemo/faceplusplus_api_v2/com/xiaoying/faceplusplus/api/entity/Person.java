@@ -10,13 +10,18 @@
  */
 package com.xiaoying.faceplusplus.api.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * 功能：人实体类
  * @author xiaoying
  */
-public class Person {
+public class Person implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7808261630401601077L;
 	private String person_name;	//相应person的name
 	private String person_id;	//相应person的id
 	private String tag;			//person相关的tag

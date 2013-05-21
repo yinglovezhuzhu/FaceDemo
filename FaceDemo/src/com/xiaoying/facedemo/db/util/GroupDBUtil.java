@@ -37,11 +37,15 @@ public class GroupDBUtil {
 	 */
 	public static long insertGroup(Context context, Group group) throws SQLiteException {
 		SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
-		ContentValues values = new ContentValues();
-		setValues(values, group);
-		long id = db.insert("groups", null, values);
+		long id = insertGroup(db, group);
 		db.close();
 		return id;
+	}
+	
+	private static long insertGroup(SQLiteDatabase db, Group group) throws SQLiteException {
+		ContentValues values = new ContentValues();
+		setValues(values, group);
+		return db.insert("groups", null, values);
 	}
 	
 	/**
@@ -53,6 +57,12 @@ public class GroupDBUtil {
 	 */
 	public static int insertGroups(Context context, List<Group> groups) throws SQLiteException {
 		SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+		int count = insertGroups(db, groups);
+		db.close();
+		return count;
+	}
+	
+	private static int insertGroups(SQLiteDatabase db, List<Group> groups) throws SQLiteException {
 		int count = 0;
 		ContentValues values = new ContentValues();
 		for (Group group : groups) {
@@ -61,7 +71,6 @@ public class GroupDBUtil {
 			db.insert("groups", null, values);
 			count++;
 		}
-		db.close();
 		return count;
 	}
 	
@@ -163,7 +172,7 @@ public class GroupDBUtil {
 	 * @return
 	 * @throws SQLiteException
 	 */
-	public static List<Group> getPersons(Context context) throws SQLiteException {
+	public static List<Group> getGroups(Context context) throws SQLiteException {
 		SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
 		List<Group> groups = new ArrayList<Group>();
 		Cursor cursor = db.query("groups", null, null, null, null, null, null);
@@ -188,7 +197,7 @@ public class GroupDBUtil {
 	}
 	
 	/**
-	 * 更新一条Person数据
+	 * 更新一条Group数据
 	 * @param context
 	 * @param group
 	 * @return
@@ -196,22 +205,32 @@ public class GroupDBUtil {
 	 */
 	public static int updateGroup(Context context, Group group) throws SQLiteException {
 		SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
-		ContentValues values = new ContentValues();
-		setValues(values, group);
-		int count = db.update("groups", values, "group_id = ?", new String [] {group.getGroup_id(), });
+		int count = updateGroup(db, group);
 		db.close();
 		return count;
 	}
 	
+	private static int updateGroup(SQLiteDatabase db, Group group) throws SQLiteException {
+		ContentValues values = new ContentValues();
+		setValues(values, group);
+		return db.update("groups", values, "group_id = ?", new String [] {group.getGroup_id(), });
+	}
+	
 	/**
-	 * 更新多条Person数据
+	 * 更新多条Group数据
 	 * @param context
 	 * @param groups
 	 * @return
 	 * @throws SQLiteException
 	 */
-	public static int updatePersons(Context context, List<Group> groups) throws SQLiteException {
+	public static int updateGroups(Context context, List<Group> groups) throws SQLiteException {
 		SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+		int count = updateGroups(db, groups);
+		db.close();
+		return count;
+	}
+	
+	private static int updateGroups(SQLiteDatabase db, List<Group> groups) throws SQLiteException {
 		ContentValues values = new ContentValues();
 		int count = 0;
 		for (Group group : groups) {
@@ -219,8 +238,56 @@ public class GroupDBUtil {
 			setValues(values, group);
 			count += db.update("groups", values, "group_id = ?", new String [] {group.getGroup_id(), });
 		}
-		db.close();
 		return count;
+	}
+	
+	/**
+	 * 更新或者删除一条数据
+	 * @param context
+	 * @param group
+	 * @return
+	 * @throws SQLiteException
+	 */
+	public static long updateOrInsertGroup(Context context, Group group) throws SQLiteException {
+		SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+		long count = 0;
+		if(containsGroup(db, group)) {
+			count = updateGroup(db, group);
+		} else {
+			count = insertGroup(db, group);
+		}
+		return count;
+	}
+
+	/**
+	 * 更新或者删除多个Group数据
+	 * @param context
+	 * @param groups
+	 * @return
+	 * @throws SQLiteException
+	 */
+	public static long updateOrInsertGroups(Context context, List<Group> groups) throws SQLiteException {
+		SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+		long count = 0;
+		for (Group group : groups) {
+			if(containsGroup(db, group)) {
+				count = updateGroup(db, group);
+			} else {
+				count = insertGroup(db, group);
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * 是否包含该数据
+	 * @param db
+	 * @return
+	 * @throws SQLiteException
+	 */
+	private static boolean containsGroup(SQLiteDatabase db, Group group) throws SQLiteException {
+		Cursor cursor = db.query("groups", null, "group_id = ?", new String [] {group.getGroup_id(), }, null, null, null);
+		return cursor != null && cursor.moveToFirst();
 	}
 	
 	/**

@@ -2,6 +2,14 @@
 <resources>
     <!-- 白色 -->
     <color name="white">#FFFFFFFF</color>
+    <!-- 黑色 -->
+    <color name="black">#FF000000</color>
+    <!-- 灰黑色 -->
+    <color name="gray_black">#FF3E3E3E</color>
+    <!-- 灰色 -->
+    <color name="gray">#FF808080</color>
+    <!-- 淡灰色 -->
+    <color name="light_gray">#FFE3E3E3</color>
     <!-- 群青色 -->
     <color name="green_blue">#FF4E72B8</color>
     <!-- 瑠璃色 -->

@@ -118,4 +118,12 @@ public class TitleBar extends RelativeLayout {
 		setRightButtonListener(listener);
 	}
 	
+	public void setLeftButtonVisible(boolean isVisible) {
+		mBtnLeft.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
+	}
+	
+	public void setRightButtonVisible(boolean isVisible) {
+		mBtnRight.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
+	}
+	
 }
