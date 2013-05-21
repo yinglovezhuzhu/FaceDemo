@@ -7,7 +7,7 @@
     android:orientation="vertical" >
     
     <com.xiaoying.facedemo.widget.TitleBar
-        android:id="@+id/tb_faceset_create"
+        android:id="@+id/tb_create_faceset"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 	
@@ -26,6 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dip"
         android:maxLines="2"
+        android:minLines="2"
+        android:gravity="top|left"
         android:hint="@string/tag"
         tools:ignore="TextFields" />
 

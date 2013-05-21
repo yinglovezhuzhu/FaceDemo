@@ -85,7 +85,7 @@ public class CreateFacesetActivity extends Activity {
 	}
 	
 	private void initView(final int mode) {
-		mTitleBar = (TitleBar) findViewById(R.id.tb_faceset_create);
+		mTitleBar = (TitleBar) findViewById(R.id.tb_create_faceset);
 		if(mode == MODE_CREATE) {
 			mTitleBar.setTitle(R.string.create_faceset);
 		} else if(mode == MODE_MODIFY) {
@@ -200,6 +200,8 @@ public class CreateFacesetActivity extends Activity {
 				} else {
 					Toast.makeText(CreateFacesetActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
+			} else {
+				Toast.makeText(CreateFacesetActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
 			}
 			dismissProgressDialog();
 		}
@@ -258,6 +260,8 @@ public class CreateFacesetActivity extends Activity {
 				} else {
 					Toast.makeText(CreateFacesetActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
+			} else {
+				Toast.makeText(CreateFacesetActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
 			}
 			dismissProgressDialog();
 		}

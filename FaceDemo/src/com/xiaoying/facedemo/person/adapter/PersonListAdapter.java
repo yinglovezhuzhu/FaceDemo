@@ -54,6 +54,13 @@ public class PersonListAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 	
+	public void add(int position, Person person) {
+		mPersons.add(position, person);
+		mChecked.add(position, false);
+		notifyDataSetChanged();
+	}
+	
+	
 	public void addAll(List<Person> persons) {
 		mPersons.addAll(persons);
 		for (int i = 0; i < persons.size(); i++) {

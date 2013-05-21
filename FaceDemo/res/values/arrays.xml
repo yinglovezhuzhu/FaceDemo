@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="person_list_long_click_menu">
+        <item>详情</item>
+        <item>修改</item>
+        <item>删除</item>
+    </string-array>
+</resources>

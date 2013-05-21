@@ -13,6 +13,7 @@
     
     <string name="pick_image_err">图片选取错误，请重新选择！</string>
     
+    
     <!-- 人脸检测 -->
     <string name="backe">返回</string>
     <string name="detect_face">人脸检测</string>
@@ -21,6 +22,8 @@
     
     <!-- Person -->
     <string name="choose_person">选择Person</string>
+	<string name="create_pserson">新增Person</string>
+	<string name="modify_person">修改Person</string>
     
     <!-- group -->
 	<string name="create">新建</string>
@@ -34,7 +37,9 @@
 	<string name="cancel">取消</string>
 	<string name="ok">确定</string>
 	<string name="submiting_data">正在提交数据，请稍候&#8230;</string>
+	<string name="deleting">正在删除，请稍候&#8230;</string>
 	<string name="sys_err">系统错误</string>
+    <string name="net_err">网络错误！</string>
 	
 	<!-- Faceset -->
 	<string name="create_faceset">新增Faceset</string>

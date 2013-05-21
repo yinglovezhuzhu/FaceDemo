@@ -189,8 +189,10 @@ public class FacesetListActivity extends Activity {
 				} else {
 					Toast.makeText(FacesetListActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
-				dismissProgressDialog();
+			} else {
+				Toast.makeText(FacesetListActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
 			}
+			dismissProgressDialog();
 		}
 		
 	}

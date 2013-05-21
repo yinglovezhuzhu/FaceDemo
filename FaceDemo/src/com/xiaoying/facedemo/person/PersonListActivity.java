@@ -19,11 +19,12 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -37,11 +38,12 @@ import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.entity.Person;
-import com.xiaoying.faceplusplus.api.entity.request.group.GroupCreateReq;
-import com.xiaoying.faceplusplus.api.entity.response.group.GroupCreateResp;
+import com.xiaoying.faceplusplus.api.entity.request.person.PersonDeleteReq;
+import com.xiaoying.faceplusplus.api.entity.request.person.PersonSetInfoReq;
 import com.xiaoying.faceplusplus.api.entity.response.info.InfoGetPersonListResp;
-import com.xiaoying.faceplusplus.api.service.GroupService;
+import com.xiaoying.faceplusplus.api.entity.response.person.PersonDeleteResp;
 import com.xiaoying.faceplusplus.api.service.InfoService;
+import com.xiaoying.faceplusplus.api.service.PersonService;
 
 /**
  * 功能：Person列表
@@ -60,6 +62,12 @@ public class PersonListActivity extends Activity {
 	public static final String EXTRA_PERSON = "person";
 	
 	public static final String EXTRA_PERSON_ARRAY = "person_array";
+	
+	public static final String EXTRA_POSITION = "position";
+	
+	public static final int REQUEST_CREATE_PERSON = 1000;
+	
+	public static final int REQUEST_MODIFY_PREDON = 1001;
 	
 	private String tag = PersonListActivity.class.getSimpleName();
 	
@@ -95,12 +103,12 @@ public class PersonListActivity extends Activity {
 			mTitleBar.setRightButton(R.string.create, new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					
+					gotoCreatePerson();
 				}
 			});
 			mAdapter = new PersonListAdapter(this);
 			mListView.setOnItemClickListener(mViewItemClick);
+			mListView.setOnItemLongClickListener(mItemLongClick);
 		} else if(mMode == MODE_PICK) {
 			mTitleBar.setTitle(R.string.choose_person);
 			mTitleBar.setRightButtonVisible(false);
@@ -113,7 +121,7 @@ public class PersonListActivity extends Activity {
 				public void onClick(View v) {
 					LogUtil.e(tag, mAdapter.getCheckedPerson());
 					Intent data = new Intent();
-					data.putExtra("", (Serializable) mAdapter.getCheckedPerson());
+					data.putExtra(EXTRA_PERSON_ARRAY, (Serializable) mAdapter.getCheckedPerson());
 					setResult(RESULT_OK, data);
 				}
 			});
@@ -146,13 +154,17 @@ public class PersonListActivity extends Activity {
 		}
 	}
 	
+	private void gotoCreatePerson() {
+		Intent intent = new Intent(this, CreatePersonActivity.class);
+		intent.putExtra(CreatePersonActivity.EXTRA_MODE, CreatePersonActivity.MODE_CREATE);
+		startActivityForResult(intent, REQUEST_CREATE_PERSON);
+	}
+	
 	private View.OnClickListener mLeftClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			switch (mMode) {
 				case MODE_PICK:
-					setResult(RESULT_CANCELED);
-					break;
 				case MODE_CHOOSE:
 					setResult(RESULT_CANCELED);
 				default :
@@ -162,14 +174,15 @@ public class PersonListActivity extends Activity {
 		}
 	};
 	
+	/** MODE_VIEW下Item单击事件 */
 	private AdapterView.OnItemClickListener mViewItemClick = new AdapterView.OnItemClickListener() {
-
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			
 		}
 	};
 	
+	/** MODE_PIC下Item单击事件 */
 	private AdapterView.OnItemClickListener mPicItemClick = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -180,10 +193,69 @@ public class PersonListActivity extends Activity {
 		}
 	};
 	
+	/** MODE_CHOOSE下Item单击事件 */
 	private AdapterView.OnItemClickListener mChooseItemClick = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			mAdapter.setChecked(position, !mAdapter.isChecked(position));
+		}
+	};
+	
+	/** Item长按事件(只在MODE_VIEW下) **/
+	private AdapterView.OnItemLongClickListener mItemLongClick = new AdapterView.OnItemLongClickListener() {
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(PersonListActivity.this)
+			.setItems(R.array.person_list_long_click_menu, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					switch (which) {
+					case 0:
+						
+						break;
+					case 1:
+						gotoModifyPerson(mAdapter.getItem(position), position);
+						break;
+					case 2:
+						new DeletePerson(position).execute(mAdapter.getItem(position));
+						break;
+					default:
+						break;
+					}
+				}
+			});
+			builder.create().show();
+			return false;
+		}
+	};
+	
+	private void gotoModifyPerson(Person person, int position) {
+		Intent intent = new Intent(this, CreatePersonActivity.class);
+		intent.putExtra(CreatePersonActivity.EXTRA_OLD_PERSON, person);
+		intent.putExtra(CreatePersonActivity.EXTRA_MODE, CreatePersonActivity.MODE_MODIFY);
+		intent.putExtra(EXTRA_POSITION, position);
+		startActivityForResult(intent, REQUEST_MODIFY_PREDON);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(resultCode == RESULT_OK) {
+			if(requestCode == REQUEST_CREATE_PERSON) {
+				if(data != null) {
+					mAdapter.add((Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
+				}
+			} else if(requestCode == REQUEST_MODIFY_PREDON) {
+				if(data != null) {
+					int position = data.getIntExtra(EXTRA_POSITION, -1);
+					if(position < 0) {
+						Toast.makeText(PersonListActivity.this, R.string.sys_err, Toast.LENGTH_SHORT).show();
+						return;
+					}
+					mAdapter.remove(position);
+					mAdapter.add(position, (Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
+				}
+			}
+			
 		}
 	};
 	
@@ -196,7 +268,11 @@ public class PersonListActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 	
-	
+	/**
+	 * 获取Person列表
+	 * @author xiaoying
+	 *
+	 */
 	private class GetPersons extends AsyncTask<Void, Void, InfoGetPersonListResp> {
 
 		private InfoService mmService = new InfoService(MainApplication.CLIENT);
@@ -238,25 +314,41 @@ public class PersonListActivity extends Activity {
 				} else {
 					Toast.makeText(PersonListActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
-				dismissProgressDialog();
+			} else {
+				Toast.makeText(PersonListActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
 			}
+			dismissProgressDialog();
 		}
 		
 	}
-
-	private void createPerson(String personName, String tag) {
-		GroupCreateReq req = new GroupCreateReq(personName);
-		req.setTag(tag);
-		new CreatePerson().execute(req);
-	}
 	
-	private class CreatePerson extends AsyncTask<GroupCreateReq, Void, GroupCreateResp> {
-
-		private GroupService mmService = new GroupService(MainApplication.CLIENT);
+	/**
+	 * 删除Person请求
+	 * @author xiaoying
+	 *
+	 */
+	private class DeletePerson extends AsyncTask<Person, Void, PersonDeleteResp> {
+		
+		private PersonService mmService = new PersonService(MainApplication.CLIENT);
+		
+		private int mmPosition = -1;
+		
+		public DeletePerson(int position) {
+			this.mmPosition = position;
+		}
+		
 		@Override
-		protected GroupCreateResp doInBackground(GroupCreateReq... params) {
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog(getString(R.string.deleting));
+		}
+
+		@Override
+		protected PersonDeleteResp doInBackground(Person... params) {
+			Person person = params[0];
 			try {
-				return mmService.createGroup(params[0]);
+				PersonDeleteReq req = new PersonDeleteReq(person.getPerson_id(), true);
+				return mmService.deletePerson(req);
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -270,21 +362,20 @@ public class PersonListActivity extends Activity {
 		}
 		
 		@Override
-		protected void onPostExecute(GroupCreateResp result) {
+		protected void onPostExecute(PersonDeleteResp result) {
 			super.onPostExecute(result);
 			if(result != null) {
 				if(result.getError_code() == RespConfig.RESP_OK) {
-					LogUtil.w(tag, result);
-					Person person = new Person();
-					person.setPerson_id(result.getGroup_id());
-					person.setPerson_name(result.getGroup_name());
-					person.setTag(result.getTag());
-					mAdapter.add(person);
+					if(result.getDeleted() > 0) {
+						mAdapter.remove(mmPosition);
+					}
 				} else {
 					Toast.makeText(PersonListActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
 				}
 			}
 			dismissProgressDialog();
 		}
+		
 	}
+
 }
