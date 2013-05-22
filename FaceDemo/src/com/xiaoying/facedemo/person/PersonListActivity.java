@@ -118,9 +118,9 @@ public class PersonListActivity extends Activity {
 			mTitleBar.setRightButton(R.string.ok, new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					LogUtil.e(tag, mAdapter.getCheckedPerson());
+					LogUtil.e(tag, mAdapter.getCheckedItems());
 					Intent data = new Intent();
-					data.putExtra(EXTRA_PERSON_ARRAY, (Serializable) mAdapter.getCheckedPerson());
+					data.putExtra(EXTRA_PERSON_ARRAY, (Serializable) mAdapter.getCheckedItems());
 					setResult(RESULT_OK, data);
 				}
 			});
@@ -250,8 +250,7 @@ public class PersonListActivity extends Activity {
 						Toast.makeText(PersonListActivity.this, R.string.sys_err, Toast.LENGTH_SHORT).show();
 						return;
 					}
-					mAdapter.remove(position);
-					mAdapter.add(position, (Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
+					mAdapter.replace(position, (Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
 				}
 			}
 			

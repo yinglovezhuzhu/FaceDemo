@@ -75,6 +75,12 @@ public class PersonListAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 	
+	public void replace(int position, Person person) {
+		mPersons.remove(position);
+		mPersons.add(position, person);
+		notifyDataSetChanged();
+	}
+	
 	public void clear() {
 		mPersons.clear();
 		mChecked.clear();
@@ -91,7 +97,7 @@ public class PersonListAdapter extends BaseAdapter {
 		return mChecked.get(position);
 	}
 	
-	public List<Person> getCheckedPerson() {
+	public List<Person> getCheckedItems() {
 		List<Person> selectedPerson = new ArrayList<Person>();
 		for (int i = 0; i < mChecked.size(); i++) {
 			if(mChecked.get(i)) {

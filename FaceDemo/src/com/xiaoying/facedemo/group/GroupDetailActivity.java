@@ -1,5 +1,5 @@
 /*
- * 文件名：GroupDeetailActivity.java
+ * 文件名：GroupDetailActivity.java
  * 版权：<版权>
  * 描述：<描述>
  * 创建人：xiaoying
@@ -19,7 +19,7 @@ import com.xiaoying.facedemo.R;
  * 功能：Group详情
  * @author xiaoying
  */
-public class GroupDeetailActivity extends Activity {
+public class GroupDetailActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

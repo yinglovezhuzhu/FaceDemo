@@ -10,13 +10,18 @@
  */
 package com.xiaoying.faceplusplus.api.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * 功能：Group实体类
  * @author xiaoying
  */
-public class Group {
+public class Group implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5604871764437501922L;
 	private String group_id;	//相应group的id
 	private String group_name;	//相应group的name
 	private String tag;	//group相关的tag

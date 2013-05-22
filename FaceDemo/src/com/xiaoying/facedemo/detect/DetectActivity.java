@@ -12,7 +12,6 @@ package com.xiaoying.facedemo.detect;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.ParseException;
@@ -34,9 +33,6 @@ import android.widget.Toast;
 import com.xiaoying.facedemo.MainActivity;
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
-import com.xiaoying.facedemo.db.util.FaceDBUtil;
-import com.xiaoying.facedemo.db.util.FaceFacesetDBUtil;
-import com.xiaoying.facedemo.db.util.FacesetDBUtil;
 import com.xiaoying.facedemo.db.util.ImageDBUtil;
 import com.xiaoying.facedemo.utils.BitmapUtil;
 import com.xiaoying.facedemo.utils.DateUtil;
@@ -47,16 +43,10 @@ import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.cliet.Client;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.entity.Face;
-import com.xiaoying.faceplusplus.api.entity.Faceset;
 import com.xiaoying.faceplusplus.api.entity.Image;
 import com.xiaoying.faceplusplus.api.entity.request.face.DetectReq;
-import com.xiaoying.faceplusplus.api.entity.request.faceset.FacesetAddFaceReq;
-import com.xiaoying.faceplusplus.api.entity.request.faceset.FacesetCreateReq;
 import com.xiaoying.faceplusplus.api.entity.response.face.DetectResp;
-import com.xiaoying.faceplusplus.api.entity.response.faceset.FacesetAddFaceResp;
-import com.xiaoying.faceplusplus.api.entity.response.faceset.FacesetCreateResp;
 import com.xiaoying.faceplusplus.api.service.FaceService;
-import com.xiaoying.faceplusplus.api.service.FacesetService;
 
 /**
  * 功能：人脸识别的Activity
@@ -77,7 +67,7 @@ public class DetectActivity extends Activity {
 	
 	private String mBitmapPath = null;
 	
-	private Faceset mFaceset = null;
+//	private Faceset mFaceset = null;
 	
 	private Image mImage = new Image();
 	
@@ -170,47 +160,47 @@ public class DetectActivity extends Activity {
 		}
 	}
 	
-	private Faceset getFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
-		List<Faceset> facesets = FacesetDBUtil.getFacesetsByKeyName(this, MainApplication.USER_NAME);
-		if(facesets.isEmpty()) {
-			return createNewFaceset(service);
-		} else {
-			for (Faceset faceset : facesets) {
-				if(faceset.getFace_count() < RespConfig.FACESET_MAX_FACE) {
-					return faceset;
-				}
-			}
-			if(mFaceset == null) {
-				return createNewFaceset(service);
-			}
-		}
-		return null;
-	}
+//	private Faceset getFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
+//		List<Faceset> facesets = FacesetDBUtil.getFacesetsByKeyName(this, MainApplication.USER_NAME);
+//		if(facesets.isEmpty()) {
+//			return createNewFaceset(service);
+//		} else {
+//			for (Faceset faceset : facesets) {
+//				if(faceset.getFace_count() < RespConfig.FACESET_MAX_FACE) {
+//					return faceset;
+//				}
+//			}
+//			if(mFaceset == null) {
+//				return createNewFaceset(service);
+//			}
+//		}
+//		return null;
+//	}
 	
-	/**
-	 * 创建一个新的Faceset
-	 * @param service
-	 * @return
-	 * @throws ClientProtocolException
-	 * @throws ParseException
-	 * @throws IOException
-	 * @throws JSONException
-	 */
-	private Faceset createNewFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
-		FacesetCreateReq req = new FacesetCreateReq(createNewFacesetName());
-		req.setTag("This is a faceset create by " + MainApplication.USER_NAME + " in " + DateUtil.getNowDate("yyyy-MM-dd HH:mm:ss"));
-		FacesetCreateResp resp = service.createFaceset(req);
-		if(resp != null && resp.getError_code() == RespConfig.RESP_OK) {
-			Faceset faceset = new Faceset();
-			faceset.setFaceset_id(resp.getFaceset_id());
-			faceset.setFaceset_name(resp.getFaceset_name());
-			faceset.setTag(resp.getTag());
-			faceset.setFace_count(resp.getAdded_face());
-			FacesetDBUtil.insertFaceset(this, faceset);
-			return faceset;
-		}
-		return null;
-	}
+//	/**
+//	 * 创建一个新的Faceset
+//	 * @param service
+//	 * @return
+//	 * @throws ClientProtocolException
+//	 * @throws ParseException
+//	 * @throws IOException
+//	 * @throws JSONException
+//	 */
+//	private Faceset createNewFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
+//		FacesetCreateReq req = new FacesetCreateReq(createNewFacesetName());
+//		req.setTag("This is a faceset create by " + MainApplication.USER_NAME + " in " + DateUtil.getNowDate("yyyy-MM-dd HH:mm:ss"));
+//		FacesetCreateResp resp = service.createFaceset(req);
+//		if(resp != null && resp.getError_code() == RespConfig.RESP_OK) {
+//			Faceset faceset = new Faceset();
+//			faceset.setFaceset_id(resp.getFaceset_id());
+//			faceset.setFaceset_name(resp.getFaceset_name());
+//			faceset.setTag(resp.getTag());
+//			faceset.setFace_count(resp.getAdded_face());
+//			FacesetDBUtil.insertFaceset(this, faceset);
+//			return faceset;
+//		}
+//		return null;
+//	}
 	
 	/**
 	 * 生成一个新的Faceset name
@@ -284,83 +274,84 @@ public class DetectActivity extends Activity {
 						mImage.setUrl(result.getUrl());
 						mImage.setWidth(result.getImg_width());
 						mImage.setHeight(result.getImg_height());
-						new AddFaceToFaceset(faces).execute();
+						ImageDBUtil.insertImage(DetectActivity.this, mImage);
+//						new AddFaceToFaceset(faces).execute();
 					}
 				} else {
 					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
-					dismissProgressDialog();
 				}
+				dismissProgressDialog();
 			}
 		}
 	}
 	
-	/**
-	 * 功能：添加Face到Faceset中
-	 * @author xiaoying
-	 *
-	 */
-	private class AddFaceToFaceset extends AsyncTask<Void, Void, FacesetAddFaceResp> {
-		
-		private List<Face> mmFaces = new ArrayList<Face>();
-		private FacesetService mmService = new FacesetService(MainApplication.CLIENT);
-		
-		public AddFaceToFaceset(List<Face> faces) {
-			if(faces == null || faces.isEmpty()) {
-				throw new IllegalArgumentException("Faces should not empty or null");
-			}
-			mmFaces = faces;
-		}
-
-		@Override
-		protected FacesetAddFaceResp doInBackground(Void... params) {
-			try {
-				mFaceset = getFaceset(mmService);
-				if(mFaceset == null) {
-					return null;
-				}
-				FacesetAddFaceReq req = new FacesetAddFaceReq(mFaceset.getFaceset_id(), true);
-				req.setFace_id(makeFaceIds(mmFaces));
-				return mmService.addFace(req);
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (ParseException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-		
-		@Override
-		protected void onPostExecute(FacesetAddFaceResp result) {
-			super.onPostExecute(result);
-			if(result != null) {
-				if(result.getError_code() == RespConfig.RESP_OK) {
-					if(result.getAdded() > 0) {
-						mFaceset.setFace_count(mFaceset.getFace_count() + result.getAdded());
-						FaceDBUtil.insertFaces(DetectActivity.this, mmFaces);
-						FacesetDBUtil.setFaceCount(DetectActivity.this, mFaceset.getFaceset_id(), mFaceset.getFace_count());
-						ImageDBUtil.insertImage(DetectActivity.this, mImage);
-						FaceFacesetDBUtil.insertFaces(DetectActivity.this, mmFaces, mFaceset.getFaceset_id());
-					}
-				} else {
-					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
-				}
-			}
-			dismissProgressDialog();
-		}
-		
-		private String makeFaceIds(List<Face> faces) {
-			StringBuilder sb = new StringBuilder();
-			for(int i = 0; i < faces.size(); i++) {
-				if(i > 0) {
-					sb.append(",");
-				}
-				sb.append(faces.get(i).getFace_id());
-			}
-			return sb.toString();
-		}
-	}
+//	/**
+//	 * 功能：添加Face到Faceset中
+//	 * @author xiaoying
+//	 *
+//	 */
+//	private class AddFaceToFaceset extends AsyncTask<Void, Void, FacesetAddFaceResp> {
+//		
+//		private List<Face> mmFaces = new ArrayList<Face>();
+//		private FacesetService mmService = new FacesetService(MainApplication.CLIENT);
+//		
+//		public AddFaceToFaceset(List<Face> faces) {
+//			if(faces == null || faces.isEmpty()) {
+//				throw new IllegalArgumentException("Faces should not empty or null");
+//			}
+//			mmFaces = faces;
+//		}
+//
+//		@Override
+//		protected FacesetAddFaceResp doInBackground(Void... params) {
+//			try {
+//				mFaceset = getFaceset(mmService);
+//				if(mFaceset == null) {
+//					return null;
+//				}
+//				FacesetAddFaceReq req = new FacesetAddFaceReq(mFaceset.getFaceset_id(), true);
+//				req.setFace_id(makeFaceIds(mmFaces));
+//				return mmService.addFace(req);
+//			} catch (ClientProtocolException e) {
+//				e.printStackTrace();
+//			} catch (ParseException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} catch (JSONException e) {
+//				e.printStackTrace();
+//			}
+//			return null;
+//		}
+//		
+//		@Override
+//		protected void onPostExecute(FacesetAddFaceResp result) {
+//			super.onPostExecute(result);
+//			if(result != null) {
+//				if(result.getError_code() == RespConfig.RESP_OK) {
+//					if(result.getAdded() > 0) {
+//						mFaceset.setFace_count(mFaceset.getFace_count() + result.getAdded());
+//						FaceDBUtil.insertFaces(DetectActivity.this, mmFaces);
+//						FacesetDBUtil.setFaceCount(DetectActivity.this, mFaceset.getFaceset_id(), mFaceset.getFace_count());
+//						ImageDBUtil.insertImage(DetectActivity.this, mImage);
+//						FaceFacesetDBUtil.insertFaces(DetectActivity.this, mmFaces, mFaceset.getFaceset_id());
+//					}
+//				} else {
+//					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
+//				}
+//			}
+//			dismissProgressDialog();
+//		}
+//		
+//		private String makeFaceIds(List<Face> faces) {
+//			StringBuilder sb = new StringBuilder();
+//			for(int i = 0; i < faces.size(); i++) {
+//				if(i > 0) {
+//					sb.append(",");
+//				}
+//				sb.append(faces.get(i).getFace_id());
+//			}
+//			return sb.toString();
+//		}
+//	}
 }

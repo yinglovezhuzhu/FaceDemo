@@ -1,0 +1,128 @@
+/*
+ * 文件名：IdentityResultAdapter.java
+ * 版权：<版权>
+ * 描述：<描述>
+ * 创建人：xiaoying
+ * 创建时间：2013-5-22
+ * 修改人：xiaoying
+ * 修改时间：2013-5-22
+ * 版本：v1.0
+ */
+package com.xiaoying.facedemo.detect.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.xiaoying.facedemo.R;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
+
+/**
+ * 功能：人脸识别结果列表适配器
+ * @author xiaoying
+ */
+public class IdentityResultAdapter extends BaseAdapter {
+
+	private Context mContext = null;
+	
+	private List<IdentityResp.Candidate> mReslts = new ArrayList<IdentityResp.Candidate>();
+	
+	private OnAddAction mOnAddAction = null;
+	
+	public IdentityResultAdapter(Context context) {
+		this.mContext = context;
+	}
+	
+	public void setOnAddAction(OnAddAction action) {
+		this.mOnAddAction = action;
+	}
+	
+	public void add(IdentityResp.Candidate obj) {
+		mReslts.add(obj);
+		notifyDataSetChanged();
+	}
+	
+	public void add(int position, IdentityResp.Candidate obj) {
+		mReslts.add(position, obj);
+		notifyDataSetChanged();
+	}
+	
+	
+	public void addAll(List<IdentityResp.Candidate> objs) {
+		mReslts.addAll(objs);
+		notifyDataSetChanged();
+	}
+	
+	public void remove(int position) {
+		mReslts.remove(position);
+		notifyDataSetChanged();
+	}
+	
+	public void clear() {
+		mReslts.clear();
+		notifyDataSetChanged();
+	}
+	
+	@Override
+	public int getCount() {
+		return mReslts.size();
+	}
+
+	@Override
+	public IdentityResp.Candidate getItem(int position) {
+		return mReslts.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(final int position, View convertView, ViewGroup parent) {
+		ViewHoder viewHoder = null;
+		if(convertView == null) {
+			viewHoder = new ViewHoder();
+			convertView = View.inflate(mContext, R.layout.item_identity_result, null);
+			viewHoder.icon = (ImageView) convertView.findViewById(R.id.iv_item_identity_icon);
+			viewHoder.text1 = (TextView) convertView.findViewById(R.id.tv_item_identity_text1);
+			viewHoder.text2 = (TextView) convertView.findViewById(R.id.tv_item_identity_text2);
+			viewHoder.text2 = (TextView) convertView.findViewById(R.id.tv_item_identity_text3);
+			viewHoder.button = (Button) convertView.findViewById(R.id.btn_item_identity_add);
+			convertView.setTag(viewHoder);
+		} else {
+			viewHoder = (ViewHoder) convertView.getTag();
+		}
+		IdentityResp.Candidate tmp = getItem(position);
+		viewHoder.icon.setImageResource(R.drawable.ic_launcher);
+		viewHoder.text1.setText(mContext.getString(R.string.similarity) + ":" +  tmp.getConfidence());
+		viewHoder.text2.setText(tmp.getPerson_name());
+		viewHoder.text3.setText(tmp.getTag());
+		viewHoder.button.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mOnAddAction.onAction(position);
+			}
+		});
+		return convertView;
+	}
+
+	private static class ViewHoder {
+		ImageView icon;
+		TextView text1;
+		TextView text2;
+		TextView text3;
+		Button button;
+	}
+	
+	public static interface OnAddAction {
+		public void onAction(int position);
+	}
+}
