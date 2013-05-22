@@ -12,15 +12,18 @@ package com.xiaoying.facedemo.detect;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -34,8 +37,8 @@ import com.xiaoying.facedemo.MainActivity;
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
 import com.xiaoying.facedemo.db.util.ImageDBUtil;
+import com.xiaoying.facedemo.person.PersonListActivity;
 import com.xiaoying.facedemo.utils.BitmapUtil;
-import com.xiaoying.facedemo.utils.DateUtil;
 import com.xiaoying.facedemo.utils.FileUtil;
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.MarkFaceView;
@@ -43,10 +46,22 @@ import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.cliet.Client;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.entity.Face;
+import com.xiaoying.faceplusplus.api.entity.Group;
 import com.xiaoying.faceplusplus.api.entity.Image;
+import com.xiaoying.faceplusplus.api.entity.Person;
 import com.xiaoying.faceplusplus.api.entity.request.face.DetectReq;
+import com.xiaoying.faceplusplus.api.entity.request.person.PersonAddFaceReq;
+import com.xiaoying.faceplusplus.api.entity.request.recognition.IdentityReq;
+import com.xiaoying.faceplusplus.api.entity.request.train.TrainIdentityReq;
 import com.xiaoying.faceplusplus.api.entity.response.face.DetectResp;
+import com.xiaoying.faceplusplus.api.entity.response.person.PersonAddFaceResp;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
+import com.xiaoying.faceplusplus.api.entity.response.train.TrainIdentityResp;
 import com.xiaoying.faceplusplus.api.service.FaceService;
+import com.xiaoying.faceplusplus.api.service.InfoService;
+import com.xiaoying.faceplusplus.api.service.PersonService;
+import com.xiaoying.faceplusplus.api.service.RecognitionService;
+import com.xiaoying.faceplusplus.api.service.TrainService;
 
 /**
  * 功能：人脸识别的Activity
@@ -54,6 +69,10 @@ import com.xiaoying.faceplusplus.api.service.FaceService;
  *
  */
 public class DetectActivity extends Activity {
+	
+	public static final int REQUEST_PICK_PERSON = 1000;
+	
+	public static final int REQUEST_CREATE_PERSON = 1001;
 	
 	private String tag = DetectActivity.class.getSimpleName();
 	
@@ -66,8 +85,6 @@ public class DetectActivity extends Activity {
 	private Bitmap mBitmap = null;
 	
 	private String mBitmapPath = null;
-	
-//	private Faceset mFaceset = null;
 	
 	private Image mImage = new Image();
 	
@@ -126,8 +143,31 @@ public class DetectActivity extends Activity {
 		public void onFaceClicked(Face face, int position) {
 			LogUtil.w(tag, "Position++++++++++>>>" + position);
 			LogUtil.w(tag, face);
+			showOptionMenu(face, position);
 		}
 	};
+	
+	private void showOptionMenu(final Face face, final int position) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(DetectActivity.this)
+		.setItems(R.array.face_click_menu, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which) {
+				case 0:
+					new IdentifyFace().execute(face);
+					break;
+				case 1:
+					gotoPickPerson(face);
+					break;
+				case 2:
+					break;
+				default:
+					break;
+				}
+			}
+		});
+		builder.create().show();
+	}
 	
 	private void initData() {
 		Intent intent = getIntent();
@@ -160,56 +200,40 @@ public class DetectActivity extends Activity {
 		}
 	}
 	
-//	private Faceset getFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
-//		List<Faceset> facesets = FacesetDBUtil.getFacesetsByKeyName(this, MainApplication.USER_NAME);
-//		if(facesets.isEmpty()) {
-//			return createNewFaceset(service);
-//		} else {
-//			for (Faceset faceset : facesets) {
-//				if(faceset.getFace_count() < RespConfig.FACESET_MAX_FACE) {
-//					return faceset;
-//				}
-//			}
-//			if(mFaceset == null) {
-//				return createNewFaceset(service);
-//			}
-//		}
-//		return null;
+//	private void gotoCreatePerson() {
+//		Intent intent = new Intent(this, CreatePersonActivity.class);
+//		intent.putExtra(CreatePersonActivity.EXTRA_MODE, CreatePersonActivity.MODE_CREATE);
+//		startActivityForResult(intent, REQUEST_CREATE_PERSON);
 //	}
 	
-//	/**
-//	 * 创建一个新的Faceset
-//	 * @param service
-//	 * @return
-//	 * @throws ClientProtocolException
-//	 * @throws ParseException
-//	 * @throws IOException
-//	 * @throws JSONException
-//	 */
-//	private Faceset createNewFaceset(FacesetService service) throws ClientProtocolException, ParseException, IOException, JSONException {
-//		FacesetCreateReq req = new FacesetCreateReq(createNewFacesetName());
-//		req.setTag("This is a faceset create by " + MainApplication.USER_NAME + " in " + DateUtil.getNowDate("yyyy-MM-dd HH:mm:ss"));
-//		FacesetCreateResp resp = service.createFaceset(req);
-//		if(resp != null && resp.getError_code() == RespConfig.RESP_OK) {
-//			Faceset faceset = new Faceset();
-//			faceset.setFaceset_id(resp.getFaceset_id());
-//			faceset.setFaceset_name(resp.getFaceset_name());
-//			faceset.setTag(resp.getTag());
-//			faceset.setFace_count(resp.getAdded_face());
-//			FacesetDBUtil.insertFaceset(this, faceset);
-//			return faceset;
-//		}
-//		return null;
-//	}
-	
-	/**
-	 * 生成一个新的Faceset name
-	 * @return
-	 */
-	@SuppressLint("SimpleDateFormat")
-	private String createNewFacesetName() {
-		return  MainApplication.USER_NAME + "_Faceset_" + DateUtil.getNowDate("yyyy-MM-dd_HHmmss");
+	private void gotoPickPerson(Face face) {
+		Intent intent = new Intent(this, PersonListActivity.class);
+		intent.putExtra(PersonListActivity.EXTRA_MODE, PersonListActivity.MODE_PICK);
+		intent.putExtra(PersonListActivity.EXTRA_FACE, face);
+		startActivityForResult(intent, REQUEST_PICK_PERSON);
 	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == RESULT_OK) {
+			switch (requestCode) {
+				case REQUEST_PICK_PERSON :
+					if(data != null && data.hasExtra(PersonListActivity.EXTRA_PERSON) && data.hasExtra(PersonListActivity.EXTRA_FACE)) {
+						Person person = (Person) data.getSerializableExtra(PersonListActivity.EXTRA_PERSON);
+						Face face = (Face) data.getSerializableExtra(PersonListActivity.EXTRA_FACE);
+						PersonAddFaceReq req = new PersonAddFaceReq(person.getPerson_id(), true);
+						req.setFace_id(face.getFace_id());
+						new AddToPerson().execute(req);
+					}
+					break;
+
+				default :
+					break;
+			}
+		}
+	}
+	
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -285,73 +309,151 @@ public class DetectActivity extends Activity {
 		}
 	}
 	
-//	/**
-//	 * 功能：添加Face到Faceset中
-//	 * @author xiaoying
-//	 *
-//	 */
-//	private class AddFaceToFaceset extends AsyncTask<Void, Void, FacesetAddFaceResp> {
-//		
-//		private List<Face> mmFaces = new ArrayList<Face>();
-//		private FacesetService mmService = new FacesetService(MainApplication.CLIENT);
-//		
-//		public AddFaceToFaceset(List<Face> faces) {
-//			if(faces == null || faces.isEmpty()) {
-//				throw new IllegalArgumentException("Faces should not empty or null");
-//			}
-//			mmFaces = faces;
-//		}
-//
-//		@Override
-//		protected FacesetAddFaceResp doInBackground(Void... params) {
-//			try {
-//				mFaceset = getFaceset(mmService);
-//				if(mFaceset == null) {
-//					return null;
-//				}
-//				FacesetAddFaceReq req = new FacesetAddFaceReq(mFaceset.getFaceset_id(), true);
-//				req.setFace_id(makeFaceIds(mmFaces));
-//				return mmService.addFace(req);
-//			} catch (ClientProtocolException e) {
-//				e.printStackTrace();
-//			} catch (ParseException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			} catch (JSONException e) {
-//				e.printStackTrace();
-//			}
-//			return null;
-//		}
-//		
-//		@Override
-//		protected void onPostExecute(FacesetAddFaceResp result) {
-//			super.onPostExecute(result);
-//			if(result != null) {
-//				if(result.getError_code() == RespConfig.RESP_OK) {
-//					if(result.getAdded() > 0) {
-//						mFaceset.setFace_count(mFaceset.getFace_count() + result.getAdded());
-//						FaceDBUtil.insertFaces(DetectActivity.this, mmFaces);
-//						FacesetDBUtil.setFaceCount(DetectActivity.this, mFaceset.getFaceset_id(), mFaceset.getFace_count());
-//						ImageDBUtil.insertImage(DetectActivity.this, mImage);
-//						FaceFacesetDBUtil.insertFaces(DetectActivity.this, mmFaces, mFaceset.getFaceset_id());
-//					}
-//				} else {
-//					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
-//				}
-//			}
-//			dismissProgressDialog();
-//		}
-//		
-//		private String makeFaceIds(List<Face> faces) {
-//			StringBuilder sb = new StringBuilder();
-//			for(int i = 0; i < faces.size(); i++) {
-//				if(i > 0) {
-//					sb.append(",");
-//				}
-//				sb.append(faces.get(i).getFace_id());
-//			}
-//			return sb.toString();
-//		}
-//	}
+	/**
+	 * 功能：把人脸添加到Person中
+	 * @author xiaoying
+	 *
+	 */
+	private class AddToPerson extends AsyncTask<PersonAddFaceReq, Void, PersonAddFaceResp> {
+
+		private PersonService mmService = new PersonService(MainApplication.CLIENT);
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog(getString(R.string.submiting_data));
+		}
+		
+		@Override
+		protected PersonAddFaceResp doInBackground(PersonAddFaceReq... params) {
+			try {
+				return mmService.addFace(params[0]);
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(PersonAddFaceResp result) {
+			super.onPostExecute(result);
+			if(result != null) {
+				if(result.getError_code() == RespConfig.RESP_OK) {
+					if(result.getAdded() > 0) {
+						Toast.makeText(DetectActivity.this, R.string.add_to_succues, Toast.LENGTH_SHORT).show();
+					} else {
+						Toast.makeText(DetectActivity.this, R.string.add_to_fail, Toast.LENGTH_SHORT).show();
+					}
+				} else {
+					Toast.makeText(DetectActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				Toast.makeText(DetectActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
+			}
+			dismissProgressDialog();
+		}
+		
+	}
+	
+	private class IdentifyFace extends AsyncTask<Face, Void, List<IdentityResp.Candidate>> {
+
+		private Face mmFace = null;
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog(getString(R.string.msg_identity));
+		}
+		
+		@Override
+		protected List<IdentityResp.Candidate> doInBackground(Face... params) {
+			mmFace = params[0];
+			try {
+				List<IdentityResp.Candidate> persons = new ArrayList<IdentityResp.Candidate>();
+				List<Group> groups = getGroups();
+				for (Group group : groups) {
+					TrainIdentityResp resp = trainIdentity(group);
+					if(resp.getError_code() == RespConfig.RESP_OK) {
+						List<IdentityResp.Candidate> candidates = identity(params[0], group);
+						merge(persons, candidates);
+					}
+				}
+				return persons;
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(List<IdentityResp.Candidate> result) {
+			super.onPostExecute(result);
+			if(result != null) {
+				LogUtil.w(tag, result);
+				if(result.isEmpty()) {
+					Toast.makeText(DetectActivity.this, R.string.no_person_identify, Toast.LENGTH_SHORT).show();
+				} else {
+					Intent intent = new Intent(DetectActivity.this, IdentifyFaceActivity.class);
+					intent.putExtra(IdentifyFaceActivity.EXTRA_PERSON_ARRAY, (Serializable) result);
+					intent.putExtra(IdentifyFaceActivity.EXTRA_FACE, mmFace);
+					startActivity(intent);
+				}
+			} else {
+				Toast.makeText(DetectActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
+			}
+			dismissProgressDialog();
+		}
+		
+		private List<Group> getGroups() throws ClientProtocolException, ParseException, IOException, JSONException {
+			InfoService service = new InfoService(MainApplication.CLIENT);
+			return service.getGroupList().getGroup();
+		}
+		
+		private TrainIdentityResp trainIdentity(Group group) throws ClientProtocolException, ParseException, IOException, JSONException {
+			TrainService service = new TrainService(MainApplication.CLIENT);
+			return service.trainIdentity(new TrainIdentityReq(group.getGroup_id(), true));
+		}
+		
+		private List<IdentityResp.Candidate> identity(Face face, Group group) throws ClientProtocolException, ParseException, IOException, JSONException {
+			List<IdentityResp.Candidate> persons = new ArrayList<IdentityResp.Candidate>();
+			RecognitionService service = new RecognitionService(MainApplication.CLIENT);
+			IdentityReq req = new IdentityReq();
+			req.setGroup_id(group.getGroup_id());
+			req.setKey_face_id(face.getFace_id());
+			IdentityResp resp = service.identity(req);
+			List<IdentityResp.IdentityFace> identityFaces = resp.getFace();
+			for (IdentityResp.IdentityFace identityFace : identityFaces) {
+				if(face.getFace_id().equals(identityFace.getFace().getFace_id())) {
+					persons.addAll(identityFace.getCandidates());
+				}
+			}
+			return persons;
+		}
+		
+		private void merge(List<IdentityResp.Candidate> parents, List<IdentityResp.Candidate> sons) {
+			if(sons.isEmpty()) {
+				return ;
+			}
+			for (IdentityResp.Candidate candidate : parents) {
+				for (IdentityResp.Candidate candidate2 : sons) {
+					if(candidate.getPerson_id().equals(candidate2.getPerson_id())) {
+						sons.remove(candidate2);
+					}
+				}
+			}
+			parents.addAll(sons);
+		}
+	}
 }

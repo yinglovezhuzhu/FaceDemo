@@ -33,14 +33,19 @@ import android.widget.Toast;
 
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
+import com.xiaoying.facedemo.group.GroupListActivity;
 import com.xiaoying.facedemo.person.adapter.PersonListAdapter;
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
+import com.xiaoying.faceplusplus.api.entity.Group;
 import com.xiaoying.faceplusplus.api.entity.Person;
+import com.xiaoying.faceplusplus.api.entity.request.group.GroupAddPersonReq;
 import com.xiaoying.faceplusplus.api.entity.request.person.PersonDeleteReq;
+import com.xiaoying.faceplusplus.api.entity.response.group.GroupAddPersonResp;
 import com.xiaoying.faceplusplus.api.entity.response.info.InfoGetPersonListResp;
 import com.xiaoying.faceplusplus.api.entity.response.person.PersonDeleteResp;
+import com.xiaoying.faceplusplus.api.service.GroupService;
 import com.xiaoying.faceplusplus.api.service.InfoService;
 import com.xiaoying.faceplusplus.api.service.PersonService;
 
@@ -62,11 +67,15 @@ public class PersonListActivity extends Activity {
 	
 	public static final String EXTRA_PERSON_ARRAY = "person_array";
 	
+	public static final String EXTRA_FACE = "face";
+	
 	public static final String EXTRA_POSITION = "position";
 	
 	public static final int REQUEST_CREATE_PERSON = 1000;
 	
 	public static final int REQUEST_MODIFY_PREDON = 1001;
+	
+	public static final int REQUEST_PICK_GROUP = 1002;
 	
 	private String tag = PersonListActivity.class.getSimpleName();
 	
@@ -122,6 +131,7 @@ public class PersonListActivity extends Activity {
 					Intent data = new Intent();
 					data.putExtra(EXTRA_PERSON_ARRAY, (Serializable) mAdapter.getCheckedItems());
 					setResult(RESULT_OK, data);
+					finish();
 				}
 			});
 			mAdapter = new PersonListAdapter(this, MODE_CHOOSE);
@@ -159,6 +169,13 @@ public class PersonListActivity extends Activity {
 		startActivityForResult(intent, REQUEST_CREATE_PERSON);
 	}
 	
+	private void gotoPickGroup(int position) {
+		Intent intent = new Intent(this, GroupListActivity.class);
+		intent.putExtra(GroupListActivity.EXTRA_MODE, GroupListActivity.MODE_PICK);
+		intent.putExtra(GroupListActivity.EXTRA_POSITION, position);
+		startActivityForResult(intent, REQUEST_PICK_GROUP);
+	}
+	
 	private View.OnClickListener mLeftClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -181,14 +198,21 @@ public class PersonListActivity extends Activity {
 		}
 	};
 	
-	/** MODE_PIC下Item单击事件 */
+	/** MODE_PICK下Item单击事件 */
 	private AdapterView.OnItemClickListener mPicItemClick = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			LogUtil.e(tag, mAdapter.getItem(position));
 			Intent data = new Intent();
-			data.putExtra(EXTRA_PERSON, mAdapter.getItemId(position));
+			data.putExtra(EXTRA_PERSON, mAdapter.getItem(position));
+			if(getIntent().hasExtra(EXTRA_POSITION)) {
+				data.putExtra(EXTRA_POSITION, getIntent().getIntExtra(EXTRA_POSITION, -1));
+			}
+			if(getIntent().hasExtra(EXTRA_FACE)) {
+				data.putExtra(EXTRA_FACE, getIntent().getSerializableExtra(EXTRA_FACE));
+			}
 			setResult(RESULT_OK, data);
+			finish();
 		}
 	};
 	
@@ -218,6 +242,9 @@ public class PersonListActivity extends Activity {
 					case 2:
 						new DeletePerson(position).execute(mAdapter.getItem(position));
 						break;
+					case 3:
+						gotoPickGroup(position);
+						break;
 					default:
 						break;
 					}
@@ -239,21 +266,33 @@ public class PersonListActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(resultCode == RESULT_OK) {
-			if(requestCode == REQUEST_CREATE_PERSON) {
-				if(data != null) {
-					mAdapter.add((Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
-				}
-			} else if(requestCode == REQUEST_MODIFY_PREDON) {
-				if(data != null) {
-					int position = data.getIntExtra(EXTRA_POSITION, -1);
-					if(position < 0) {
-						Toast.makeText(PersonListActivity.this, R.string.sys_err, Toast.LENGTH_SHORT).show();
-						return;
+			switch (requestCode) {
+				case REQUEST_CREATE_PERSON :
+					if(data != null) {
+						mAdapter.add((Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
 					}
-					mAdapter.replace(position, (Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
-				}
+					break;
+				case REQUEST_MODIFY_PREDON:
+					if(data != null) {
+						int position = data.getIntExtra(EXTRA_POSITION, -1);
+						if(position < 0) {
+							Toast.makeText(PersonListActivity.this, R.string.sys_err, Toast.LENGTH_SHORT).show();
+							return;
+						}
+						mAdapter.replace(position, (Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
+					}
+					break;
+				case REQUEST_PICK_GROUP:
+					if(data != null && data.hasExtra(GroupListActivity.EXTRA_GROUP) && data.hasExtra(GroupListActivity.EXTRA_POSITION)) {
+						GroupAddPersonReq req = new GroupAddPersonReq();
+						req.setGroup_id(((Group) data.getSerializableExtra(GroupListActivity.EXTRA_GROUP)).getGroup_id());
+						req.setPerson_id(mAdapter.getItem(data.getIntExtra(GroupListActivity.EXTRA_POSITION, -1)).getPerson_id());
+						new AddToGroup().execute(req);
+					}
+					break;
+				default :
+					break;
 			}
-			
 		}
 	};
 	
@@ -375,5 +414,56 @@ public class PersonListActivity extends Activity {
 		}
 		
 	}
+	
+	/**
+	 * 功能：添加Perosn到Group
+	 * @author xiaoying
+	 *
+	 */
+	private class AddToGroup extends AsyncTask<GroupAddPersonReq, Void, GroupAddPersonResp> {
 
+		private GroupService mmService = new GroupService(MainApplication.CLIENT);
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog(getString(R.string.submiting_data));
+		}
+		
+		@Override
+		protected GroupAddPersonResp doInBackground(GroupAddPersonReq... params) {
+			try {
+				return mmService.addPerson(params[0]);
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(GroupAddPersonResp result) {
+			super.onPostExecute(result);
+			if(result != null) {
+				if(result.getError_code() == RespConfig.RESP_OK) {
+					if(result.getAdded() > 0) {
+						Toast.makeText(PersonListActivity.this, R.string.add_to_succues, Toast.LENGTH_SHORT).show();
+					} else {
+						Toast.makeText(PersonListActivity.this, R.string.add_to_fail, Toast.LENGTH_SHORT).show();
+					}
+				} else {
+					Toast.makeText(PersonListActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				Toast.makeText(PersonListActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
+			}
+			dismissProgressDialog();
+		}
+		
+	}
 }

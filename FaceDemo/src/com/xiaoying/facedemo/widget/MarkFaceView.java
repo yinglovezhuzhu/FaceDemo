@@ -20,7 +20,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -30,6 +29,7 @@ import android.widget.ImageView.ScaleType;
 
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.faceplusplus.api.entity.Face;
+import com.xiaoying.faceplusplus.api.entity.PointF;
 /**
  * 
  * 功能：标识人脸的View

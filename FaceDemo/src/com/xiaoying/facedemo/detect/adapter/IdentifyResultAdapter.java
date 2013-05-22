@@ -1,5 +1,5 @@
 /*
- * 文件名：IdentityResultAdapter.java
+ * 文件名：IdentifyResultAdapter.java
  * 版权：<版权>
  * 描述：<描述>
  * 创建人：xiaoying
@@ -28,7 +28,7 @@ import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
  * 功能：人脸识别结果列表适配器
  * @author xiaoying
  */
-public class IdentityResultAdapter extends BaseAdapter {
+public class IdentifyResultAdapter extends BaseAdapter {
 
 	private Context mContext = null;
 	
@@ -36,7 +36,7 @@ public class IdentityResultAdapter extends BaseAdapter {
 	
 	private OnAddAction mOnAddAction = null;
 	
-	public IdentityResultAdapter(Context context) {
+	public IdentifyResultAdapter(Context context) {
 		this.mContext = context;
 	}
 	
@@ -91,24 +91,26 @@ public class IdentityResultAdapter extends BaseAdapter {
 		if(convertView == null) {
 			viewHoder = new ViewHoder();
 			convertView = View.inflate(mContext, R.layout.item_identity_result, null);
-			viewHoder.icon = (ImageView) convertView.findViewById(R.id.iv_item_identity_icon);
-			viewHoder.text1 = (TextView) convertView.findViewById(R.id.tv_item_identity_text1);
-			viewHoder.text2 = (TextView) convertView.findViewById(R.id.tv_item_identity_text2);
-			viewHoder.text2 = (TextView) convertView.findViewById(R.id.tv_item_identity_text3);
-			viewHoder.button = (Button) convertView.findViewById(R.id.btn_item_identity_add);
+			viewHoder.icon = (ImageView) convertView.findViewById(R.id.iv_item_identify_icon);
+			viewHoder.text1 = (TextView) convertView.findViewById(R.id.tv_item_identify_text1);
+			viewHoder.text2 = (TextView) convertView.findViewById(R.id.tv_item_identify_text2);
+			viewHoder.text3 = (TextView) convertView.findViewById(R.id.tv_item_identify_text3);
+			viewHoder.button = (Button) convertView.findViewById(R.id.btn_item_identify_add);
 			convertView.setTag(viewHoder);
 		} else {
 			viewHoder = (ViewHoder) convertView.getTag();
 		}
 		IdentityResp.Candidate tmp = getItem(position);
 		viewHoder.icon.setImageResource(R.drawable.ic_launcher);
-		viewHoder.text1.setText(mContext.getString(R.string.similarity) + ":" +  tmp.getConfidence());
-		viewHoder.text2.setText(tmp.getPerson_name());
+		viewHoder.text1.setText(tmp.getPerson_name());
+		viewHoder.text2.setText(mContext.getString(R.string.similarity) + ":" +  tmp.getConfidence());
 		viewHoder.text3.setText(tmp.getTag());
 		viewHoder.button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mOnAddAction.onAction(position);
+				if(mOnAddAction != null) {
+					mOnAddAction.onAdd(position);
+				}
 			}
 		});
 		return convertView;
@@ -123,6 +125,6 @@ public class IdentityResultAdapter extends BaseAdapter {
 	}
 	
 	public static interface OnAddAction {
-		public void onAction(int position);
+		public void onAdd(int position);
 	}
 }

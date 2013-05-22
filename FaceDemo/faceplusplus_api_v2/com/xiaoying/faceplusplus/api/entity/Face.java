@@ -12,8 +12,6 @@ package com.xiaoying.faceplusplus.api.entity;
 
 import java.io.Serializable;
 
-import android.graphics.PointF;
-
 /**
  * 功能：人脸实体类
  * @author xiaoying
@@ -323,7 +321,11 @@ public class Face implements Serializable {
 	 * 性别
 	 * @author xiaoying
 	 */
-	public static class Gender {
+	public static class Gender implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3604771785466469504L;
 		// gender object 包含性别分析结果，value的值为Male/Female, confidence表示置信度
 		public String value; //值为Male/Female
 		public float confidence; //置信度
@@ -351,7 +353,11 @@ public class Face implements Serializable {
 	 * 年龄
 	 * @author xiaoying
 	 */
-	public static class Age {
+	public static class Age implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 221737413026253122L;
 		// age object 包含年龄分析结果，value的值为一个非负整数表示估计的年龄, range表示估计年龄的正负区间
 		public int value;	//一个非负整数表示估计的年龄
 		public int range;	//估计年龄的正负区间
@@ -378,7 +384,11 @@ public class Face implements Serializable {
 	 * 种族
 	 * @author xiaoying
 	 */
-	public static class Race {
+	public static class Race implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 888019375173484388L;
 		// race object 包含人种分析结果，value的值为Asian/White/Black, confidence表示置信度
 		public String value; //值为Asian/White/Black
 		public float confidence; //置信度

@@ -11,6 +11,7 @@
 
 package com.xiaoying.faceplusplus.api.entity.response.recognition;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.xiaoying.faceplusplus.api.entity.Face;
@@ -126,7 +127,11 @@ public class IdentityResp extends BaseResponse {
 	 * @author xiaoying
 	 *
 	 */
-	public static class Candidate {
+	public static class Candidate implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -178216610187842006L;
 		private String person_id;	//person的id
 		private String person_name;	//person的name
 		private String tag;	//person的tag

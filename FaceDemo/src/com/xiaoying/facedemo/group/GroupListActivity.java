@@ -130,6 +130,7 @@ public class GroupListActivity extends Activity {
 					Intent data = new Intent();
 					data.putExtra(EXTRA_GROUP_ARRAY, (Serializable) mAdapter.getCheckedItems());
 					setResult(RESULT_OK, data);
+					finish();
 				}
 			});
 			mAdapter = new GroupListAdapter(this, MODE_CHOOSE);
@@ -197,14 +198,18 @@ public class GroupListActivity extends Activity {
 		}
 	};
 	
-	/** MODE_PIC下Item单击事件 */
+	/** MODE_PICK下Item单击事件 */
 	private AdapterView.OnItemClickListener mPicItemClick = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			LogUtil.e(tag, mAdapter.getItem(position));
 			Intent data = new Intent();
-			data.putExtra(EXTRA_GROUP, mAdapter.getItemId(position));
+			data.putExtra(EXTRA_GROUP, mAdapter.getItem(position));
+			if(getIntent().hasExtra(EXTRA_POSITION)) {
+				data.putExtra(EXTRA_POSITION, getIntent().getIntExtra(EXTRA_POSITION, -1));
+			}
 			setResult(RESULT_OK, data);
+			finish();
 		}
 	};
 	
@@ -226,7 +231,6 @@ public class GroupListActivity extends Activity {
 				public void onClick(DialogInterface dialog, int which) {
 					switch (which) {
 					case 0:
-						
 						break;
 					case 1:
 						gotoModifyGroup(mAdapter.getItem(position), position);

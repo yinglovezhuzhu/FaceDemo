@@ -11,8 +11,34 @@
 
 package com.xiaoying.facedemo.detect;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import com.xiaoying.facedemo.MainApplication;
+import com.xiaoying.facedemo.R;
+import com.xiaoying.facedemo.detect.adapter.IdentifyResultAdapter;
+import com.xiaoying.facedemo.utils.LogUtil;
+import com.xiaoying.facedemo.widget.TitleBar;
+import com.xiaoying.faceplusplus.api.config.RespConfig;
+import com.xiaoying.faceplusplus.api.entity.Face;
+import com.xiaoying.faceplusplus.api.entity.request.person.PersonAddFaceReq;
+import com.xiaoying.faceplusplus.api.entity.response.person.PersonAddFaceResp;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp.Candidate;
+import com.xiaoying.faceplusplus.api.service.PersonService;
 
 /**
  * 功能：人脸识别
@@ -20,10 +46,144 @@ import android.os.Bundle;
  *
  */
 public class IdentifyFaceActivity extends Activity {
+	
+	public static final String EXTRA_PERSON_ARRAY = "person_array";
+
+	public static final String EXTRA_FACE = "face";
+	
+	private String tag = IdentifyFaceActivity.class.getSimpleName();
+	
+	private TitleBar mTitleBar = null;
+	
+	private ListView mListView = null;
+	
+	private ProgressDialog mProgressDialog = null;
+	
+	private IdentifyResultAdapter mAdapter = null;
+	
+	private Face mFace = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.activity_identify_face);
+		
+		initView();
+		
+		initData();
 	}
+	
+	private void initView() {
+		mTitleBar = (TitleBar) findViewById(R.id.tb_indentity_face_title);
+		mListView = (ListView) findViewById(R.id.lv_indentity_face_list);
+		mAdapter = new IdentifyResultAdapter(this);
+		mListView.setAdapter(mAdapter);
+		mTitleBar.setLeftButton(R.string.backe, new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+		mTitleBar.setTitle(R.string.identify_result);
+		mTitleBar.setRightButtonVisible(false);
+		mAdapter.setOnAddAction(new IdentifyResultAdapter.OnAddAction() {
+			@Override
+			public void onAdd(int position) {
+				if(mFace != null) {
+					IdentityResp.Candidate candidate = mAdapter.getItem(position);
+					PersonAddFaceReq req = new PersonAddFaceReq(candidate.getPerson_id(), true);
+					req.setFace_id(mFace.getFace_id());
+					new AddToPerson().execute(req);
+				}
+			}
+		});
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void initData() {
+		Intent intent = getIntent();
+		if(intent.hasExtra(EXTRA_PERSON_ARRAY) && intent.hasExtra(EXTRA_FACE)) {
+			mAdapter.addAll((List<Candidate>) intent.getSerializableExtra(EXTRA_PERSON_ARRAY));
+			mFace = (Face) intent.getSerializableExtra(EXTRA_FACE);
+		} else {
+			Toast.makeText(this, R.string.sys_err, Toast.LENGTH_SHORT).show();
+			finish();
+		}
+	}
+	
+
+	private void initProgressDialog() {
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		mProgressDialog.setCancelable(true);
+	}
+	
+	private void showProgressDialog(CharSequence message) {
+		if(mProgressDialog == null) {
+			initProgressDialog();
+		}
+		mProgressDialog.setMessage(message);
+		mProgressDialog.show();
+	}
+	
+	private void dismissProgressDialog() {
+		if(mProgressDialog != null && mProgressDialog.isShowing()) {
+			mProgressDialog.dismiss();
+		}
+	}
+	
+	/**
+	 * 功能：把人脸添加到Person中
+	 * @author xiaoying
+	 *
+	 */
+	private class AddToPerson extends AsyncTask<PersonAddFaceReq, Void, PersonAddFaceResp> {
+
+		private PersonService mmService = new PersonService(MainApplication.CLIENT);
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog(getString(R.string.submiting_data));
+		}
+		
+		@Override
+		protected PersonAddFaceResp doInBackground(PersonAddFaceReq... params) {
+			try {
+				return mmService.addFace(params[0]);
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(PersonAddFaceResp result) {
+			super.onPostExecute(result);
+			if(result != null) {
+				LogUtil.i(tag, result);
+				if(result.getError_code() == RespConfig.RESP_OK) {
+					if(result.getAdded() > 0) {
+						Toast.makeText(IdentifyFaceActivity.this, R.string.add_to_succues, Toast.LENGTH_SHORT).show();
+					} else {
+						Toast.makeText(IdentifyFaceActivity.this, R.string.add_to_fail, Toast.LENGTH_SHORT).show();
+					}
+				} else {
+					Toast.makeText(IdentifyFaceActivity.this, result.getError(), Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				Toast.makeText(IdentifyFaceActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
+			}
+			dismissProgressDialog();
+		}
+		
+	}
+	
 }

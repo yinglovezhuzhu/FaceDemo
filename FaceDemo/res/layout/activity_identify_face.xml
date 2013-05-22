@@ -29,5 +29,6 @@
 	    android:layout_alignParentBottom="true"
 	    android:layout_centerHorizontal="true"
 	    android:background="@drawable/selector_btn"
+	    android:padding="5dip"
 	    android:text="@string/add_to_other_person" />
 </RelativeLayout>

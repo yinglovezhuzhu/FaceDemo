@@ -11,6 +11,8 @@
 package com.xiaoying.facedemo.person;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -23,14 +25,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
+import com.xiaoying.facedemo.group.GroupListActivity;
+import com.xiaoying.facedemo.person.adapter.AddGroupAdapter;
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
+import com.xiaoying.faceplusplus.api.entity.Group;
 import com.xiaoying.faceplusplus.api.entity.Person;
 import com.xiaoying.faceplusplus.api.entity.request.person.PersonCreateReq;
 import com.xiaoying.faceplusplus.api.entity.request.person.PersonSetInfoReq;
@@ -50,6 +57,8 @@ public class CreatePersonActivity extends Activity {
 	
 	public static final String EXTRA_MODE = "mode";
 	
+	public static final int REQUEST_CHOOSE_GROUP = 1000;
+	
 	public static final int MODE_CREATE = 1;
 	
 	public static final int MODE_MODIFY = 2;
@@ -63,6 +72,12 @@ public class CreatePersonActivity extends Activity {
 	private EditText mEtName = null;
 	
 	private EditText mEtTag = null;
+	
+	private Button mBtnChoose = null;
+	
+	private ListView mLvChoosedGroup = null;
+	
+	private AddGroupAdapter mAdapter = null;
 	
 	private int mPosition = -1;
 	
@@ -88,9 +103,15 @@ public class CreatePersonActivity extends Activity {
 		mTitleBar = (TitleBar) findViewById(R.id.tb_create_person);
 		mEtName = (EditText) findViewById(R.id.et_create_person_name);
 		mEtTag = (EditText) findViewById(R.id.et_create_person_tag);
+		mBtnChoose = (Button) findViewById(R.id.btn_add_to_group);
+		mLvChoosedGroup = (ListView) findViewById(R.id.lv_add_to_group_list);
+		mAdapter = new AddGroupAdapter(this);
+		mLvChoosedGroup.setAdapter(mAdapter);
 		if(mode == MODE_CREATE) {
+			findViewById(R.id.ll_add_to_group_content).setVisibility(View.VISIBLE);
 			mTitleBar.setTitle(R.string.create_pserson);
 		} else if(mode == MODE_MODIFY) {
+			findViewById(R.id.ll_add_to_group_content).setVisibility(View.GONE);
 			mTitleBar.setTitle(R.string.modify_person);
 			Intent intent = getIntent();
 			if(intent.hasExtra(EXTRA_OLD_PERSON)) {
@@ -115,14 +136,27 @@ public class CreatePersonActivity extends Activity {
 				submit(mode);
 			}
 		});
+		mBtnChoose.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				gotoChooseGroup();
+			}
+		});
+	}
+	
+	private void gotoChooseGroup() {
+		Intent intent = new Intent(this, GroupListActivity.class);
+		intent.putExtra(GroupListActivity.EXTRA_MODE, GroupListActivity.MODE_CHOOSE);
+		startActivityForResult(intent, REQUEST_CHOOSE_GROUP);
 	}
 	
 	private void submit(int mode) {
 		if(mode == MODE_CREATE) {
-			Person person = new Person();
-			person.setPerson_name(mEtName.getText().toString());
-			person.setTag(mEtTag.getText().toString());
-			new CreatePerson().execute(person);
+			PersonCreateReq req = new PersonCreateReq();
+			req.setPerson_name(mEtName.getText().toString());
+			req.setTag(mEtTag.getText().toString());
+			req.setGroup_id(getAddedGroupIds());
+			new CreatePerson().execute(req);
 		} else if(mode == MODE_MODIFY) {
 			Person person = (Person) getIntent().getSerializableExtra(EXTRA_OLD_PERSON);
 			person.setPerson_name(mEtName.getText().toString());
@@ -156,6 +190,55 @@ public class CreatePersonActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * 去除已选的Group
+	 * @param newGroups
+	 * @param oldGroups
+	 */
+	private List<Group> handleRepeat(List<Group> groups) {
+		List<Group> addedGroup = mAdapter.getData();
+		if(addedGroup.isEmpty()) {
+			return groups;
+		}
+		List<Group> result = new ArrayList<Group>(groups);
+		for (Group group : groups) {
+			for (Group g : addedGroup) {
+				if(g.getGroup_id().equals(group.getGroup_id())) {
+					result.remove(group);
+					break;
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 获取加入的组ID，多个用逗号隔开
+	 * @return
+	 */
+	private String getAddedGroupIds() {
+		List<Group> groups = mAdapter.getData();
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < groups.size(); i++) {
+			if(i > 0) {
+				sb.append(",");
+			}
+			sb.append(groups.get(i).getGroup_id());
+		}
+		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == RESULT_OK && requestCode == REQUEST_CHOOSE_GROUP) {
+			if(data != null && data.hasExtra(GroupListActivity.EXTRA_GROUP_ARRAY)) {
+				mAdapter.addAll(handleRepeat((List<Group>) data.getSerializableExtra(GroupListActivity.EXTRA_GROUP_ARRAY)));
+			}
+		}
+	}
+	
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -171,7 +254,7 @@ public class CreatePersonActivity extends Activity {
 	 * @author xiaoying
 	 *
 	 */
-	private class CreatePerson extends AsyncTask<Person, Void, PersonCreateResp> {
+	private class CreatePerson extends AsyncTask<PersonCreateReq, Void, PersonCreateResp> {
 
 		private PersonService mmService = new PersonService(MainApplication.CLIENT);
 		
@@ -182,12 +265,9 @@ public class CreatePersonActivity extends Activity {
 		}
 		
 		@Override
-		protected PersonCreateResp doInBackground(Person... params) {
-			Person person = params[0];
+		protected PersonCreateResp doInBackground(PersonCreateReq... params) {
 			try {
-				PersonCreateReq req = new PersonCreateReq(person.getPerson_name());
-				req.setTag(person.getTag());
-				return mmService.createPerson(req);
+				return mmService.createPerson(params[0]);
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {

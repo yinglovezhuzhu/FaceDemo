@@ -22,11 +22,19 @@
     <string name="add_to_other_person">加入到其他Person</string>
     <string name="add_to">加入</string>
     <string name="similarity">相似度</string>
+    <string name="msg_identity">正在识别，请稍候&#8230;</string>
+    <string name="no_person_identify">没有找到匹配的Person</string>
+    <string name="identify_result">识别结果</string>
     
     <!-- Person -->
     <string name="choose_person">选择Person</string>
 	<string name="create_pserson">新增Person</string>
 	<string name="modify_person">修改Person</string>
+	<string name="add_to_group">添加到Group</string>
+	<string name="add">添加</string>
+	<string name="delete">删除</string>
+	<string name="add_to_succues">添加成功！</string>
+	<string name="add_to_fail">添加失败，您已添加过！</string>
     
     <!-- group -->
 	<string name="create">新建</string>
