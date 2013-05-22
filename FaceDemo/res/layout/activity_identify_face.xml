@@ -14,7 +14,7 @@
     <ListView
         android:id="@+id/lv_indentity_face_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_below="@+id/tb_indentity_face_title"
         android:layout_above="@+id/btn_indentity_face_add_to_person"
@@ -30,5 +30,6 @@
 	    android:layout_centerHorizontal="true"
 	    android:background="@drawable/selector_btn"
 	    android:padding="5dip"
-	    android:text="@string/add_to_other_person" />
+	    android:text="@string/add_to_other_person"
+	    android:textSize="@dimen/size_item_text1" />
 </RelativeLayout>

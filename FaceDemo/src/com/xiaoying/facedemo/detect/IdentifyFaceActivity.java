@@ -30,10 +30,12 @@ import android.widget.Toast;
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
 import com.xiaoying.facedemo.detect.adapter.IdentifyResultAdapter;
+import com.xiaoying.facedemo.person.PersonListActivity;
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.entity.Face;
+import com.xiaoying.faceplusplus.api.entity.Person;
 import com.xiaoying.faceplusplus.api.entity.request.person.PersonAddFaceReq;
 import com.xiaoying.faceplusplus.api.entity.response.person.PersonAddFaceResp;
 import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
@@ -50,6 +52,8 @@ public class IdentifyFaceActivity extends Activity {
 	public static final String EXTRA_PERSON_ARRAY = "person_array";
 
 	public static final String EXTRA_FACE = "face";
+	
+	public static final int REQUEST_PICK_PERSON = 1000;
 	
 	private String tag = IdentifyFaceActivity.class.getSimpleName();
 	
@@ -98,6 +102,12 @@ public class IdentifyFaceActivity extends Activity {
 				}
 			}
 		});
+		findViewById(R.id.btn_indentity_face_add_to_person).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				gotoPickPerson();
+			}
+		});
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -112,6 +122,12 @@ public class IdentifyFaceActivity extends Activity {
 		}
 	}
 	
+
+	private void gotoPickPerson() {
+		Intent intent = new Intent(this, PersonListActivity.class);
+		intent.putExtra(PersonListActivity.EXTRA_MODE, PersonListActivity.MODE_PICK);
+		startActivityForResult(intent, REQUEST_PICK_PERSON);
+	}
 
 	private void initProgressDialog() {
 		mProgressDialog = new ProgressDialog(this);
@@ -130,6 +146,19 @@ public class IdentifyFaceActivity extends Activity {
 	private void dismissProgressDialog() {
 		if(mProgressDialog != null && mProgressDialog.isShowing()) {
 			mProgressDialog.dismiss();
+		}
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == RESULT_OK && requestCode == REQUEST_PICK_PERSON) {
+			if(data != null && data.hasExtra(PersonListActivity.EXTRA_PERSON)) {
+				PersonAddFaceReq req = new PersonAddFaceReq();
+				req.setPerson_id(((Person) data.getSerializableExtra(PersonListActivity.EXTRA_PERSON)).getPerson_id());
+				req.setFace_id(mFace.getFace_id());
+				new AddToPerson().execute(req);
+			}
 		}
 	}
 	
