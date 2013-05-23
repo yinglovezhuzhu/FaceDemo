@@ -21,6 +21,8 @@ public class MainApplication extends Application {
 	public static String APP_PIC_PATH = APP_ROOT_DIR + "image/";
 	
 	public static String USER_NAME = "xiaoying";
+	
+	public static int mScreenWidth = 0;
 
 	@Override
 	public void onCreate() {

@@ -103,7 +103,7 @@ public class IdentifyResultAdapter extends BaseAdapter {
 		IdentityResp.Candidate tmp = getItem(position);
 		viewHoder.icon.setImageResource(R.drawable.ic_launcher);
 		viewHoder.text1.setText(tmp.getPerson_name());
-		viewHoder.text2.setText(mContext.getString(R.string.similarity) + ":" +  tmp.getConfidence());
+		viewHoder.text2.setText(mContext.getString(R.string.similarity) + ":" +  tmp.getConfidence() + "%");
 		viewHoder.text3.setText(tmp.getTag());
 		viewHoder.button.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -113,6 +113,16 @@ public class IdentifyResultAdapter extends BaseAdapter {
 				}
 			}
 		});
+		if(position == 0) {
+			convertView.setBackgroundColor(mContext.getResources().getColor(R.color.light_blue));
+		} else {
+			convertView.setBackgroundColor(mContext.getResources().getColor(R.color.white));
+		}
+//		if(tmp.getConfidence() > 50f) {
+//			convertView.setBackgroundColor(R.color.light_blue);
+//		} else {
+//			convertView.setBackgroundColor(R.color.white);
+//		}
 		return convertView;
 	}
 

@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.http.ParseException;
@@ -36,6 +38,8 @@ import android.widget.Toast;
 import com.xiaoying.facedemo.MainActivity;
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
+import com.xiaoying.facedemo.db.util.FaceDBUtil;
+import com.xiaoying.facedemo.db.util.FacePersonDBUtil;
 import com.xiaoying.facedemo.db.util.ImageDBUtil;
 import com.xiaoying.facedemo.person.PersonListActivity;
 import com.xiaoying.facedemo.utils.BitmapUtil;
@@ -56,6 +60,7 @@ import com.xiaoying.faceplusplus.api.entity.request.train.TrainIdentityReq;
 import com.xiaoying.faceplusplus.api.entity.response.face.DetectResp;
 import com.xiaoying.faceplusplus.api.entity.response.person.PersonAddFaceResp;
 import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp.Candidate;
 import com.xiaoying.faceplusplus.api.entity.response.train.TrainIdentityResp;
 import com.xiaoying.faceplusplus.api.service.FaceService;
 import com.xiaoying.faceplusplus.api.service.InfoService;
@@ -224,7 +229,7 @@ public class DetectActivity extends Activity {
 						Face face = (Face) data.getSerializableExtra(PersonListActivity.EXTRA_FACE);
 						PersonAddFaceReq req = new PersonAddFaceReq(person.getPerson_id(), true);
 						req.setFace_id(face.getFace_id());
-						new AddToPerson().execute(req);
+						new AddToPerson(face).execute(req);
 					}
 					break;
 
@@ -298,7 +303,7 @@ public class DetectActivity extends Activity {
 						mImage.setUrl(result.getUrl());
 						mImage.setWidth(result.getImg_width());
 						mImage.setHeight(result.getImg_height());
-						ImageDBUtil.insertImage(DetectActivity.this, mImage);
+//						ImageDBUtil.insertImage(DetectActivity.this, mImage);
 //						new AddFaceToFaceset(faces).execute();
 					}
 				} else {
@@ -318,6 +323,14 @@ public class DetectActivity extends Activity {
 
 		private PersonService mmService = new PersonService(MainApplication.CLIENT);
 		
+		private Face mmFace = null;
+		
+		private String mmPersonId = null;
+		
+		public AddToPerson(Face face) {
+			this.mmFace = face;
+		}
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -326,6 +339,7 @@ public class DetectActivity extends Activity {
 		
 		@Override
 		protected PersonAddFaceResp doInBackground(PersonAddFaceReq... params) {
+			mmPersonId = params[0].getPerson_id();
 			try {
 				return mmService.addFace(params[0]);
 			} catch (ClientProtocolException e) {
@@ -347,6 +361,9 @@ public class DetectActivity extends Activity {
 				if(result.getError_code() == RespConfig.RESP_OK) {
 					if(result.getAdded() > 0) {
 						Toast.makeText(DetectActivity.this, R.string.add_to_succues, Toast.LENGTH_SHORT).show();
+						FaceDBUtil.insertFace(DetectActivity.this, mmFace);
+						ImageDBUtil.insertImageifNeed(DetectActivity.this, mImage);
+						FacePersonDBUtil.insertFace(DetectActivity.this, mmFace, mmPersonId);
 					} else {
 						Toast.makeText(DetectActivity.this, R.string.add_to_fail, Toast.LENGTH_SHORT).show();
 					}
@@ -361,6 +378,11 @@ public class DetectActivity extends Activity {
 		
 	}
 	
+	/**
+	 * 功能：识别
+	 * @author xiaoying
+	 *
+	 */
 	private class IdentifyFace extends AsyncTask<Face, Void, List<IdentityResp.Candidate>> {
 
 		private Face mmFace = null;
@@ -381,9 +403,17 @@ public class DetectActivity extends Activity {
 					TrainIdentityResp resp = trainIdentity(group);
 					if(resp.getError_code() == RespConfig.RESP_OK) {
 						List<IdentityResp.Candidate> candidates = identity(params[0], group);
-						merge(persons, candidates);
+						List<IdentityResp.Candidate> sons = new ArrayList<IdentityResp.Candidate>();
+						for (IdentityResp.Candidate candidate : candidates) {
+							LogUtil.e(tag, "Confidence is low ? ++++++++>>> " + (candidate.getConfidence() > 25f));
+							if(candidate.getConfidence() > 25f) {
+								sons.add(candidate);
+							}
+						}
+						merge(persons, sons);
 					}
 				}
+				Collections.sort(persons, new CandidateComparator());	//排序
 				return persons;
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
@@ -402,14 +432,15 @@ public class DetectActivity extends Activity {
 			super.onPostExecute(result);
 			if(result != null) {
 				LogUtil.w(tag, result);
-				if(result.isEmpty()) {
-					Toast.makeText(DetectActivity.this, R.string.no_person_identify, Toast.LENGTH_SHORT).show();
-				} else {
+//				if(result.isEmpty()) {
+//					Toast.makeText(DetectActivity.this, R.string.no_person_identify, Toast.LENGTH_SHORT).show();
+//				} else {
 					Intent intent = new Intent(DetectActivity.this, IdentifyFaceActivity.class);
 					intent.putExtra(IdentifyFaceActivity.EXTRA_PERSON_ARRAY, (Serializable) result);
 					intent.putExtra(IdentifyFaceActivity.EXTRA_FACE, mmFace);
+					intent.putExtra(IdentifyFaceActivity.EXTRA_IMAGE, mImage);
 					startActivity(intent);
-				}
+//				}
 			} else {
 				Toast.makeText(DetectActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
 			}
@@ -455,5 +486,14 @@ public class DetectActivity extends Activity {
 			}
 			parents.addAll(sons);
 		}
+	}
+	
+	private class CandidateComparator implements Comparator<IdentityResp.Candidate> {
+
+		@Override
+		public int compare(Candidate lhs, Candidate rhs) {
+			return -Float.valueOf(lhs.getConfidence()).compareTo(Float.valueOf(rhs.getConfidence()));
+		}
+		
 	}
 }

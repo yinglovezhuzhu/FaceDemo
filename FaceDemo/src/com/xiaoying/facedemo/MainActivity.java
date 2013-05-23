@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Toast;
 
@@ -43,6 +44,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		findViewById(R.id.btn_person_manager).setOnClickListener(this);
 		findViewById(R.id.btn_group_manager).setOnClickListener(this);
 		findViewById(R.id.btn_faceset_manager).setOnClickListener(this);
+		
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		MainApplication.mScreenWidth = dm.widthPixels;
 	}
 	
 	@Override

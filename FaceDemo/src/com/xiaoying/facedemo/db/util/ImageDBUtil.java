@@ -20,7 +20,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
 import com.xiaoying.facedemo.db.DBHelper;
+import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.faceplusplus.api.entity.Image;
+import com.xiaoying.faceplusplus.api.entity.Person;
 
 /**
  * 功能：数据库图片表数据操作工具类
@@ -28,6 +30,7 @@ import com.xiaoying.faceplusplus.api.entity.Image;
  */
 public class ImageDBUtil {
 //	img_id TEXT PRIMARY KEY, img TEXT, url TEXT, width INTEGER, height INTEGER
+	
 	/**
 	 * 插入一个Image数据
 	 * @param context
@@ -65,6 +68,29 @@ public class ImageDBUtil {
 		return count;
 	}
 	
+	public static int insertImageifNeed(Context context, Image image) throws SQLiteException {
+		SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+		if(contains(db, image)) {
+			return 0;
+		}
+		ContentValues values = new ContentValues();
+		setValue(values, image);
+		db.insertOrThrow("images", null, values);
+		db.close();
+		return 1;
+	}
+	
+	private static boolean contains(SQLiteDatabase db, Image image) throws SQLiteException {
+		boolean contains = false;
+		Cursor cursor = db.query("images", null, "img_id = ? and img = ?", 
+				new String [] {image.getImageId(), image.getImg(), }, null, null, null);
+		if(cursor != null) {
+			contains = cursor.moveToFirst();
+			cursor.close();
+		}
+		return contains;
+	}
+	
 	/**
 	 * 根据ID查找一张Image
 	 * @param context
@@ -89,6 +115,50 @@ public class ImageDBUtil {
 		}
 		db.close();
 		return image;
+	}
+	
+	/**
+	 * 查找一个Person下相关的Image
+	 * @param context
+	 * @param person
+	 * @return
+	 * @throws SQLiteException
+	 */
+	public static List<Image> getImages(Context context, Person person) throws SQLiteException {
+		SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
+		List<Image> images = new ArrayList<Image>();
+		String [] culumns = new String [] {"images.img_id as img_id", "images.img as img", "images.url as url", 
+				"images.width as width", "images.height as height", };
+		Cursor cursor = db.query("images,faces,face_person", 
+				culumns, 
+				"face_person.face_id = faces.face_id and images.img_id = faces.img_id and face_person.person_id = ?", 
+				new String [] {person.getPerson_id(), }	, null, null, null);
+		if(cursor != null) {
+			String [] names = cursor.getColumnNames();
+			for (String string : names) {
+				LogUtil.e("DB", string);
+			}
+			if(cursor.moveToFirst()) {
+				Image image = null;
+				int id = cursor.getColumnIndex("img_id");
+				int img = cursor.getColumnIndex("img");
+				int url = cursor.getColumnIndex("url");
+				int width = cursor.getColumnIndex("width");
+				int height = cursor.getColumnIndex("height");
+				do {
+					image = new Image();
+					image.setImageId(cursor.getString(id));
+					image.setImg(cursor.getString(img));
+					image.setUrl(cursor.getString(url));
+					image.setWidth(cursor.getInt(width));
+					image.setHeight(cursor.getInt(height));
+					images.add(image);
+				} while(cursor.moveToNext());
+			}
+			cursor.close();
+		}
+		LogUtil.i("DB", images);
+		return images;
 	}
 	
 	/**

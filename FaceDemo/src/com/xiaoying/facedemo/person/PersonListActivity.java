@@ -194,7 +194,7 @@ public class PersonListActivity extends Activity {
 	private AdapterView.OnItemClickListener mViewItemClick = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			
+			gotoPersonDetail(mAdapter.getItem(position));
 		}
 	};
 	
@@ -255,6 +255,12 @@ public class PersonListActivity extends Activity {
 		}
 	};
 	
+	private void gotoPersonDetail(Person person) {
+		Intent intent = new Intent(this, PersonDetailActivity.class);
+		intent.putExtra(EXTRA_PERSON, person);
+		startActivity(intent);
+	}
+	
 	private void gotoModifyPerson(Person person, int position) {
 		Intent intent = new Intent(this, CreatePersonActivity.class);
 		intent.putExtra(CreatePersonActivity.EXTRA_OLD_PERSON, person);
@@ -299,6 +305,7 @@ public class PersonListActivity extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK) {
+			setResult(RESULT_CANCELED);
 			finish();
 			return true;
 		}

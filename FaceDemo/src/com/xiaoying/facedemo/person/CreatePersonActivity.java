@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
+import com.xiaoying.facedemo.db.util.PersonDBUtil;
 import com.xiaoying.facedemo.group.GroupListActivity;
 import com.xiaoying.facedemo.person.adapter.AddGroupAdapter;
 import com.xiaoying.facedemo.utils.LogUtil;
@@ -290,6 +291,7 @@ public class CreatePersonActivity extends Activity {
 					person.setPerson_id(result.getPerson_id());
 					person.setPerson_name(result.getPerson_name());
 					person.setTag(result.getTag());
+					PersonDBUtil.insertPerson(CreatePersonActivity.this, person);
 					Intent data = new Intent();
 					data.putExtra(EXTRA_NEW_PERSON, person);
 					setResult(RESULT_OK, data);

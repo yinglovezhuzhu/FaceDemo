@@ -29,17 +29,20 @@ import android.widget.Toast;
 
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
+import com.xiaoying.facedemo.db.util.FaceDBUtil;
+import com.xiaoying.facedemo.db.util.FacePersonDBUtil;
+import com.xiaoying.facedemo.db.util.ImageDBUtil;
 import com.xiaoying.facedemo.detect.adapter.IdentifyResultAdapter;
 import com.xiaoying.facedemo.person.PersonListActivity;
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
 import com.xiaoying.faceplusplus.api.entity.Face;
+import com.xiaoying.faceplusplus.api.entity.Image;
 import com.xiaoying.faceplusplus.api.entity.Person;
 import com.xiaoying.faceplusplus.api.entity.request.person.PersonAddFaceReq;
 import com.xiaoying.faceplusplus.api.entity.response.person.PersonAddFaceResp;
 import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
-import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp.Candidate;
 import com.xiaoying.faceplusplus.api.service.PersonService;
 
 /**
@@ -52,6 +55,8 @@ public class IdentifyFaceActivity extends Activity {
 	public static final String EXTRA_PERSON_ARRAY = "person_array";
 
 	public static final String EXTRA_FACE = "face";
+	
+	public static final String EXTRA_IMAGE = "image";
 	
 	public static final int REQUEST_PICK_PERSON = 1000;
 	
@@ -66,6 +71,8 @@ public class IdentifyFaceActivity extends Activity {
 	private IdentifyResultAdapter mAdapter = null;
 	
 	private Face mFace = null;
+	
+	private Image mImage = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,9 +120,14 @@ public class IdentifyFaceActivity extends Activity {
 	@SuppressWarnings("unchecked")
 	private void initData() {
 		Intent intent = getIntent();
-		if(intent.hasExtra(EXTRA_PERSON_ARRAY) && intent.hasExtra(EXTRA_FACE)) {
-			mAdapter.addAll((List<Candidate>) intent.getSerializableExtra(EXTRA_PERSON_ARRAY));
+		if(intent.hasExtra(EXTRA_PERSON_ARRAY) && intent.hasExtra(EXTRA_FACE) && intent.hasExtra(EXTRA_IMAGE)) {
+			List<IdentityResp.Candidate> datas = (List<IdentityResp.Candidate>) intent.getSerializableExtra(EXTRA_PERSON_ARRAY);
+			if(datas.isEmpty()) {
+				Toast.makeText(IdentifyFaceActivity.this, R.string.no_person_identify, Toast.LENGTH_SHORT).show();
+			}
+			mAdapter.addAll(datas);
 			mFace = (Face) intent.getSerializableExtra(EXTRA_FACE);
+			mImage = (Image) intent.getSerializableExtra(EXTRA_IMAGE);
 		} else {
 			Toast.makeText(this, R.string.sys_err, Toast.LENGTH_SHORT).show();
 			finish();
@@ -171,6 +183,8 @@ public class IdentifyFaceActivity extends Activity {
 
 		private PersonService mmService = new PersonService(MainApplication.CLIENT);
 		
+		private String mmPersonId = null;
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -179,6 +193,8 @@ public class IdentifyFaceActivity extends Activity {
 		
 		@Override
 		protected PersonAddFaceResp doInBackground(PersonAddFaceReq... params) {
+			mmPersonId = params[0].getPerson_id();
+			
 			try {
 				return mmService.addFace(params[0]);
 			} catch (ClientProtocolException e) {
@@ -201,6 +217,9 @@ public class IdentifyFaceActivity extends Activity {
 				if(result.getError_code() == RespConfig.RESP_OK) {
 					if(result.getAdded() > 0) {
 						Toast.makeText(IdentifyFaceActivity.this, R.string.add_to_succues, Toast.LENGTH_SHORT).show();
+						FaceDBUtil.insertFace(IdentifyFaceActivity.this, mFace);
+						ImageDBUtil.insertImageifNeed(IdentifyFaceActivity.this, mImage);
+						FacePersonDBUtil.insertFace(IdentifyFaceActivity.this, mFace, mmPersonId);
 					} else {
 						Toast.makeText(IdentifyFaceActivity.this, R.string.add_to_fail, Toast.LENGTH_SHORT).show();
 					}
