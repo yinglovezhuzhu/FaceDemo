@@ -41,6 +41,7 @@ import com.xiaoying.facedemo.R;
 import com.xiaoying.facedemo.db.util.FaceDBUtil;
 import com.xiaoying.facedemo.db.util.FacePersonDBUtil;
 import com.xiaoying.facedemo.db.util.ImageDBUtil;
+import com.xiaoying.facedemo.person.CreatePersonActivity;
 import com.xiaoying.facedemo.person.PersonListActivity;
 import com.xiaoying.facedemo.utils.BitmapUtil;
 import com.xiaoying.facedemo.utils.FileUtil;
@@ -59,8 +60,8 @@ import com.xiaoying.faceplusplus.api.entity.request.recognition.IdentityReq;
 import com.xiaoying.faceplusplus.api.entity.request.train.TrainIdentityReq;
 import com.xiaoying.faceplusplus.api.entity.response.face.DetectResp;
 import com.xiaoying.faceplusplus.api.entity.response.person.PersonAddFaceResp;
-import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
-import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp.Candidate;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentifyResp;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentifyResp.Candidate;
 import com.xiaoying.faceplusplus.api.entity.response.train.TrainIdentityResp;
 import com.xiaoying.faceplusplus.api.service.FaceService;
 import com.xiaoying.faceplusplus.api.service.InfoService;
@@ -92,6 +93,8 @@ public class DetectActivity extends Activity {
 	private String mBitmapPath = null;
 	
 	private Image mImage = new Image();
+	
+//	private List<Face> mFaces = new ArrayList<Face>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -224,12 +227,21 @@ public class DetectActivity extends Activity {
 		if(resultCode == RESULT_OK) {
 			switch (requestCode) {
 				case REQUEST_PICK_PERSON :
-					if(data != null && data.hasExtra(PersonListActivity.EXTRA_PERSON) && data.hasExtra(PersonListActivity.EXTRA_FACE)) {
-						Person person = (Person) data.getSerializableExtra(PersonListActivity.EXTRA_PERSON);
-						Face face = (Face) data.getSerializableExtra(PersonListActivity.EXTRA_FACE);
-						PersonAddFaceReq req = new PersonAddFaceReq(person.getPerson_id(), true);
-						req.setFace_id(face.getFace_id());
-						new AddToPerson(face).execute(req);
+					if(data != null) {
+						if(data.hasExtra(PersonListActivity.EXTRA_PERSON) && data.hasExtra(PersonListActivity.EXTRA_FACE)) {
+							Person person = (Person) data.getSerializableExtra(PersonListActivity.EXTRA_PERSON);
+							Face face = (Face) data.getSerializableExtra(PersonListActivity.EXTRA_FACE);
+							PersonAddFaceReq req = new PersonAddFaceReq(person.getPerson_id(), true);
+							req.setFace_id(face.getFace_id());
+							new AddToPerson(face).execute(req);
+						} else if(data.hasExtra(CreatePersonActivity.EXTRA_NEW_PERSON)) {
+							Toast.makeText(DetectActivity.this, R.string.add_to_succues, Toast.LENGTH_SHORT).show();
+							Person person = (Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON);
+							Face face = (Face) data.getSerializableExtra(PersonListActivity.EXTRA_FACE);
+							FaceDBUtil.insertFace(DetectActivity.this, face);
+							ImageDBUtil.insertImageifNeed(DetectActivity.this, mImage);
+							FacePersonDBUtil.insertFace(DetectActivity.this, face, person.getPerson_id());
+						}
 					}
 					break;
 
@@ -383,7 +395,7 @@ public class DetectActivity extends Activity {
 	 * @author xiaoying
 	 *
 	 */
-	private class IdentifyFace extends AsyncTask<Face, Void, List<IdentityResp.Candidate>> {
+	private class IdentifyFace extends AsyncTask<Face, Void, List<IdentifyResp.Candidate>> {
 
 		private Face mmFace = null;
 		
@@ -394,17 +406,17 @@ public class DetectActivity extends Activity {
 		}
 		
 		@Override
-		protected List<IdentityResp.Candidate> doInBackground(Face... params) {
+		protected List<IdentifyResp.Candidate> doInBackground(Face... params) {
 			mmFace = params[0];
 			try {
-				List<IdentityResp.Candidate> persons = new ArrayList<IdentityResp.Candidate>();
+				List<IdentifyResp.Candidate> persons = new ArrayList<IdentifyResp.Candidate>();
 				List<Group> groups = getGroups();
 				for (Group group : groups) {
 					TrainIdentityResp resp = trainIdentity(group);
 					if(resp.getError_code() == RespConfig.RESP_OK) {
-						List<IdentityResp.Candidate> candidates = identity(params[0], group);
-						List<IdentityResp.Candidate> sons = new ArrayList<IdentityResp.Candidate>();
-						for (IdentityResp.Candidate candidate : candidates) {
+						List<IdentifyResp.Candidate> candidates = identity(params[0], group);
+						List<IdentifyResp.Candidate> sons = new ArrayList<IdentifyResp.Candidate>();
+						for (IdentifyResp.Candidate candidate : candidates) {
 							LogUtil.e(tag, "Confidence is low ? ++++++++>>> " + (candidate.getConfidence() > 25f));
 							if(candidate.getConfidence() > 25f) {
 								sons.add(candidate);
@@ -428,7 +440,7 @@ public class DetectActivity extends Activity {
 		}
 		
 		@Override
-		protected void onPostExecute(List<IdentityResp.Candidate> result) {
+		protected void onPostExecute(List<IdentifyResp.Candidate> result) {
 			super.onPostExecute(result);
 			if(result != null) {
 				LogUtil.w(tag, result);
@@ -457,15 +469,15 @@ public class DetectActivity extends Activity {
 			return service.trainIdentity(new TrainIdentityReq(group.getGroup_id(), true));
 		}
 		
-		private List<IdentityResp.Candidate> identity(Face face, Group group) throws ClientProtocolException, ParseException, IOException, JSONException {
-			List<IdentityResp.Candidate> persons = new ArrayList<IdentityResp.Candidate>();
+		private List<IdentifyResp.Candidate> identity(Face face, Group group) throws ClientProtocolException, ParseException, IOException, JSONException {
+			List<IdentifyResp.Candidate> persons = new ArrayList<IdentifyResp.Candidate>();
 			RecognitionService service = new RecognitionService(MainApplication.CLIENT);
 			IdentityReq req = new IdentityReq();
 			req.setGroup_id(group.getGroup_id());
 			req.setKey_face_id(face.getFace_id());
-			IdentityResp resp = service.identity(req);
-			List<IdentityResp.IdentityFace> identityFaces = resp.getFace();
-			for (IdentityResp.IdentityFace identityFace : identityFaces) {
+			IdentifyResp resp = service.identity(req);
+			List<IdentifyResp.IdentifyFace> identityFaces = resp.getFace();
+			for (IdentifyResp.IdentifyFace identityFace : identityFaces) {
 				if(face.getFace_id().equals(identityFace.getFace().getFace_id())) {
 					persons.addAll(identityFace.getCandidates());
 				}
@@ -473,12 +485,12 @@ public class DetectActivity extends Activity {
 			return persons;
 		}
 		
-		private void merge(List<IdentityResp.Candidate> parents, List<IdentityResp.Candidate> sons) {
+		private void merge(List<IdentifyResp.Candidate> parents, List<IdentifyResp.Candidate> sons) {
 			if(sons.isEmpty()) {
 				return ;
 			}
-			for (IdentityResp.Candidate candidate : parents) {
-				for (IdentityResp.Candidate candidate2 : sons) {
+			for (IdentifyResp.Candidate candidate : parents) {
+				for (IdentifyResp.Candidate candidate2 : sons) {
 					if(candidate.getPerson_id().equals(candidate2.getPerson_id())) {
 						sons.remove(candidate2);
 					}
@@ -488,7 +500,136 @@ public class DetectActivity extends Activity {
 		}
 	}
 	
-	private class CandidateComparator implements Comparator<IdentityResp.Candidate> {
+	
+//	/**
+//	 * 功能：识别
+//	 * @author xiaoying
+//	 *
+//	 */
+//	private class Identify extends AsyncTask<List<Face>, Void, List<IdentifyResp.Candidate>> {
+//
+////		private Face mmFace = null;
+//		
+//		@Override
+//		protected void onPreExecute() {
+//			super.onPreExecute();
+//			showProgressDialog(getString(R.string.msg_identity));
+//		}
+//		
+//		@Override
+//		protected List<IdentifyResp.Candidate> doInBackground(List<Face>... params) {
+////			mmFace = params[0];
+//			try {
+////				List<IdentifyResp.Candidate> persons = new ArrayList<IdentifyResp.Candidate>();
+//				List<IdentifyResp.IdentifyFace> faceResults = new ArrayList<IdentifyResp.IdentifyFace>();
+//				List<Group> groups = getGroups();
+//				for (Group group : groups) {
+//					trainIdentity(group);
+//				}
+//				for (Group group : groups) {
+//					IdentifyResp resp = identity(params[0], group);
+//					faceResults.addAll(resp.getFace());
+////					List<IdentityResp.Candidate> candidates = identity(params[0], group);
+////					List<IdentityResp.Candidate> sons = new ArrayList<IdentityResp.Candidate>();
+////					for (IdentityResp.Candidate candidate : candidates) {
+////						LogUtil.e(tag, "Confidence is low ? ++++++++>>> " + (candidate.getConfidence() > 25f));
+////						if(candidate.getConfidence() > 25f) {
+////							sons.add(candidate);
+////						}
+////					}
+////					merge(persons, sons);
+//				}
+//				List<IdentifyResp.Candidate> persons = getCandidates(faceResults);
+//				Collections.sort(persons, new CandidateComparator());	//排序
+//				return persons;
+//			} catch (ClientProtocolException e) {
+//				e.printStackTrace();
+//			} catch (ParseException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} catch (JSONException e) {
+//				e.printStackTrace();
+//			}
+//			return null;
+//		}
+//		
+//		@Override
+//		protected void onPostExecute(List<IdentifyResp.Candidate> result) {
+//			super.onPostExecute(result);
+//			if(result != null) {
+//				LogUtil.w(tag, result);
+////				if(result.isEmpty()) {
+////					Toast.makeText(DetectActivity.this, R.string.no_person_identify, Toast.LENGTH_SHORT).show();
+////				} else {
+//					Intent intent = new Intent(DetectActivity.this, IdentifyFaceActivity.class);
+//					intent.putExtra(IdentifyFaceActivity.EXTRA_PERSON_ARRAY, (Serializable) result);
+////					intent.putExtra(IdentifyFaceActivity.EXTRA_FACE, mmFace);
+//					intent.putExtra(IdentifyFaceActivity.EXTRA_IMAGE, mImage);
+//					startActivity(intent);
+////				}
+//			} else {
+//				Toast.makeText(DetectActivity.this, R.string.net_err, Toast.LENGTH_SHORT).show();
+//			}
+//			dismissProgressDialog();
+//		}
+//		
+//		private List<Group> getGroups() throws ClientProtocolException, ParseException, IOException, JSONException {
+//			InfoService service = new InfoService(MainApplication.CLIENT);
+//			return service.getGroupList().getGroup();
+//		}
+//		
+//		private TrainIdentityResp trainIdentity(Group group) throws ClientProtocolException, ParseException, IOException, JSONException {
+//			TrainService service = new TrainService(MainApplication.CLIENT);
+//			return service.trainIdentity(new TrainIdentityReq(group.getGroup_id(), true));
+//		}
+//
+//		//匹配
+//		private IdentifyResp identity(List<Face> faces, Group group) throws ClientProtocolException, ParseException, IOException, JSONException {
+//			RecognitionService service = new RecognitionService(MainApplication.CLIENT);
+//			IdentityReq req = new IdentityReq();
+//			req.setGroup_id(group.getGroup_id());
+//			req.setKey_face_id(getFaceIds(faces));
+//			IdentifyResp resp = service.identity(req);
+//			return resp;
+//		}
+//		
+//		private String getFaceIds(List<Face> faces) {
+//			StringBuilder sb = new StringBuilder();
+//			for(int i = 0; i < faces.size(); i++) {
+//				if(i > 0) {
+//					sb.append(",");
+//				}
+//				sb.append(faces.get(i).getFace_id());
+//			}
+//			return sb.toString();
+//		}
+//		
+//		private List<IdentifyResp.Candidate> getCandidates(List<IdentifyResp.IdentifyFace> faces) {
+//			List<IdentifyResp.Candidate> candidates = new ArrayList<IdentifyResp.Candidate>();
+//			for (IdentifyResp.IdentifyFace face : faces) {
+////				candidates.addAll(face.getCandidates());
+//				merge(candidates, face.getCandidates());
+//			}
+//			return candidates;
+//		}
+//		
+//		private void merge(List<IdentifyResp.Candidate> parents, List<IdentifyResp.Candidate> sons) {
+//			if(sons.isEmpty()) {
+//				return ;
+//			}
+//			for (IdentifyResp.Candidate candidate : parents) {
+//				for (IdentifyResp.Candidate candidate2 : sons) {
+//					if(candidate.getPerson_id().equals(candidate2.getPerson_id())) {
+//						sons.remove(candidate2);
+//					}
+//				}
+//			}
+//			parents.addAll(sons);
+//		}
+//	}
+	
+	private class CandidateComparator implements Comparator<IdentifyResp.Candidate> {
 
 		@Override
 		public int compare(Candidate lhs, Candidate rhs) {

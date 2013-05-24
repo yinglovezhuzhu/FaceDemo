@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.xiaoying.facedemo.R;
-import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentifyResp;
 
 /**
  * 功能：人脸识别结果列表适配器
@@ -32,7 +32,7 @@ public class IdentifyResultAdapter extends BaseAdapter {
 
 	private Context mContext = null;
 	
-	private List<IdentityResp.Candidate> mReslts = new ArrayList<IdentityResp.Candidate>();
+	private List<IdentifyResp.Candidate> mReslts = new ArrayList<IdentifyResp.Candidate>();
 	
 	private OnAddAction mOnAddAction = null;
 	
@@ -44,18 +44,18 @@ public class IdentifyResultAdapter extends BaseAdapter {
 		this.mOnAddAction = action;
 	}
 	
-	public void add(IdentityResp.Candidate obj) {
+	public void add(IdentifyResp.Candidate obj) {
 		mReslts.add(obj);
 		notifyDataSetChanged();
 	}
 	
-	public void add(int position, IdentityResp.Candidate obj) {
+	public void add(int position, IdentifyResp.Candidate obj) {
 		mReslts.add(position, obj);
 		notifyDataSetChanged();
 	}
 	
 	
-	public void addAll(List<IdentityResp.Candidate> objs) {
+	public void addAll(List<IdentifyResp.Candidate> objs) {
 		mReslts.addAll(objs);
 		notifyDataSetChanged();
 	}
@@ -76,7 +76,7 @@ public class IdentifyResultAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public IdentityResp.Candidate getItem(int position) {
+	public IdentifyResp.Candidate getItem(int position) {
 		return mReslts.get(position);
 	}
 
@@ -100,7 +100,7 @@ public class IdentifyResultAdapter extends BaseAdapter {
 		} else {
 			viewHoder = (ViewHoder) convertView.getTag();
 		}
-		IdentityResp.Candidate tmp = getItem(position);
+		IdentifyResp.Candidate tmp = getItem(position);
 		viewHoder.icon.setImageResource(R.drawable.ic_launcher);
 		viewHoder.text1.setText(tmp.getPerson_name());
 		viewHoder.text2.setText(mContext.getString(R.string.similarity) + ":" +  tmp.getConfidence() + "%");

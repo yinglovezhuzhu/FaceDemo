@@ -59,6 +59,8 @@ public class MarkFaceView extends FrameLayout {
 	private int mAlpha = 130;
 	/** 框颜色 */
 	private int mBorderColor = Color.argb(mAlpha, 0x00, 0x9A, 0xD6);
+	
+	private float mTextSize = 30f;
 	/** Bitmap显示和实际的缩放比例 */
 	private float mScale = 1.0f;
 	/** Bitmap对象，当调用setBitmap(Bitmap bitmap)方法时，或将参数中的bitmap复制到这个对象中，并且是Mutable的 */
@@ -155,15 +157,20 @@ public class MarkFaceView extends FrameLayout {
 		calculatePosition(mBitmap);
 		int bmWidth = mBitmap.getWidth();
 		int bmHeight = mBitmap.getHeight();
-		float outerBorderWidth = getStrokeWidth(bmWidth, bmHeight, mOuterBorderWidth);
-		float innerBorderWidth = getStrokeWidth(bmWidth, bmHeight, mInnerBorderWidth);
+//		float outerBorderWidth = getNeedSize(bmWidth, bmHeight, mOuterBorderWidth);
+//		float innerBorderWidth = getNeedSize(bmWidth, bmHeight, mInnerBorderWidth);
 		mPaint.setColor(mBorderColor);
-		mPaint.setStyle(Style.STROKE);
 		for (Face face : faces) {
-			mPaint.setStrokeWidth(outerBorderWidth);
+//			mPaint.setStrokeWidth(outerBorderWidth);
 			drawOuterRect(mCanvas, mPaint, face, bmWidth, bmHeight);
-			mPaint.setStrokeWidth(innerBorderWidth);
+			
+//			drawTagBackgroupd(mCanvas, mPaint, face, bmWidth, bmHeight);
+//			
+//			drawTagText(mCanvas, mPaint, face, bmWidth, bmHeight, "TAG");
+
+//			mPaint.setStrokeWidth(innerBorderWidth);
 			drawInerRect(mCanvas, mPaint, face, bmWidth, bmHeight);
+			
 		}
 		mImageView.setImageBitmap(mBitmap);
 	}
@@ -180,15 +187,22 @@ public class MarkFaceView extends FrameLayout {
 		PointF center = face.getCenter();
 		float width = face.getWidth();
 		float height = face.getHeight();
-		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) - paint.getStrokeWidth();
-		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) - paint.getStrokeWidth();
-		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) + paint.getStrokeWidth();
-		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) + paint.getStrokeWidth();
+		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) - mOuterBorderWidth / mScale;
+		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) - mOuterBorderWidth / mScale;
+		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) + mOuterBorderWidth / mScale;
+		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) + mOuterBorderWidth / mScale;
 		RectF rect = new RectF(left, top, right, bottom);
-		mRects.add(new RectF(mImageLeft + (left + paint.getStrokeWidth()) * mScale, 
-				mImageTop + (top + paint.getStrokeWidth()) * mScale, 
-				mImageLeft + (right - paint.getStrokeWidth()) * mScale, 
-				mImageTop + (bottom - paint.getStrokeWidth()) * mScale));
+//		mRects.add(new RectF(mImageLeft + (left + paint.getStrokeWidth()) * mScale, 
+//				mImageTop + (top + paint.getStrokeWidth()) * mScale, 
+//				mImageLeft + (right - paint.getStrokeWidth()) * mScale, 
+//				mImageTop + (bottom - paint.getStrokeWidth()) * mScale));
+		mRects.add(new RectF(mImageLeft + left * mScale + mOuterBorderWidth, 
+				mImageTop + top * mScale + mOuterBorderWidth, 
+				mImageLeft + right * mScale - mOuterBorderWidth, 
+				mImageTop + bottom * mScale - mOuterBorderWidth));
+		mPaint.setColor(mBorderColor);
+		mPaint.setStyle(Style.STROKE);
+		mPaint.setStrokeWidth(mOuterBorderWidth / mScale);
 		canvas.drawRect(rect, paint);
 	}
 	
@@ -204,11 +218,13 @@ public class MarkFaceView extends FrameLayout {
 		PointF center = face.getCenter();
 		float width = face.getWidth();
 		float height = face.getHeight();
-		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) + mIODist;
-		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) + mIODist;
-		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) - mIODist;
-		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) - mIODist;
-		
+		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) + mIODist / mScale;
+		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) + mIODist / mScale;
+		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) - mIODist / mScale;
+		float bottom = (bmHeight * (center.y / 100) + bmHeight * (height / 100) / 2) - mIODist / mScale;
+		mPaint.setColor(mBorderColor);
+		mPaint.setStyle(Style.STROKE);
+		mPaint.setStrokeWidth(mInnerBorderWidth / mScale);
 		canvas.drawLines(getInerPoints(left, top, right, bottom), paint);
 	}
 	
@@ -227,24 +243,55 @@ public class MarkFaceView extends FrameLayout {
 		};
 	}
 	
-	/**
-	 * 根据Bitmap显示在ImageViwe中的缩放比例，算出在手机显示相应像素的实际像素
-	 * @param bmWidth
-	 * @param bmHeight
-	 * @param real
-	 * @return
-	 */
-	private float getStrokeWidth(int bmWidth, int bmHeight, float real) {
-		float ivWidth = mImageRight - mImageLeft;
-		float ivHeight = mImageBottom - mImageTop;
-		if(ivWidth > bmWidth && ivHeight > bmHeight) {
-			return real;
-		}
-		float wScale = (float)bmWidth / ivWidth;
-		float hScale = (float) bmHeight / ivHeight;
-		float scale = wScale < hScale ? wScale : hScale;
-		return real * scale;
-	}
+//	private void drawTagBackgroupd(Canvas canvas, Paint paint, Face face, int bmWidth, int bmHeight) {
+//		PointF center = face.getCenter();
+//		float width = face.getWidth();
+//		float height = face.getHeight();
+//		float left = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) - paint.getStrokeWidth() * 3 /2;
+//		float top = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) - paint.getStrokeWidth() * 3 / 2 - mTextSize / mScale;
+//		float right = (bmWidth * (center.x / 100) + bmWidth * (width / 100) / 2) + paint.getStrokeWidth() * 3 / 2;
+//		float bottom = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) - paint.getStrokeWidth() * 3 / 2;
+//		RectF rect = new RectF(left, top, right, bottom);
+////		mRects.add(new RectF(mImageLeft + (left + paint.getStrokeWidth()) * mScale, 
+////				mImageTop + (top + paint.getStrokeWidth()) * mScale, 
+////				mImageLeft + (right - paint.getStrokeWidth()) * mScale, 
+////				mImageTop + (bottom - paint.getStrokeWidth()) * mScale));
+//		mPaint.setColor(mBorderColor);
+//		mPaint.setStyle(Style.FILL);
+//		canvas.drawRect(rect, paint);
+//	}
+	
+//	private void drawTagText(Canvas canvas, Paint paint, Face face, int bmWidth, int bmHeight, String text) {
+//		PointF center = face.getCenter();
+//		float width = face.getWidth();
+//		float height = face.getHeight();
+//		float x = (bmWidth * (center.x / 100) - bmWidth * (width / 100) / 2) - paint.getStrokeWidth() / 2;
+//		float y = (bmHeight * (center.y / 100) - bmHeight * (height / 100) / 2) - paint.getStrokeWidth() * 3 / 2;
+//		mPaint.setColor(Color.BLACK);
+//		mPaint.setStyle(Style.FILL_AND_STROKE);
+//		mPaint.setStrokeWidth(1f);
+//		mPaint.setTextSize(mTextSize / mScale);
+//		canvas.drawText(text, x, y, paint);
+//	}
+//	
+//	/**
+//	 * 根据Bitmap显示在ImageViwe中的缩放比例，算出在手机显示相应像素的实际像素
+//	 * @param bmWidth
+//	 * @param bmHeight
+//	 * @param real
+//	 * @return
+//	 */
+//	private float getNeedSize(int bmWidth, int bmHeight, float real) {
+//		float ivWidth = mImageRight - mImageLeft;
+//		float ivHeight = mImageBottom - mImageTop;
+//		if(ivWidth > bmWidth && ivHeight > bmHeight) {
+//			return real;
+//		}
+//		float wScale = (float)bmWidth / ivWidth;
+//		float hScale = (float) bmHeight / ivHeight;
+//		float scale = wScale < hScale ? wScale : hScale;
+//		return real * scale;
+//	}
 
 	/**
 	 * 设置外框宽度

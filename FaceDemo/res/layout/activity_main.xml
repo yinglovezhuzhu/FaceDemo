@@ -12,7 +12,7 @@
         android:layout_above="@+id/ll_bottom_tool_bar"
         android:layout_alignParentTop="true"
         android:padding="8dip"
-        android:src="@drawable/faceplusplus_logo"
+        android:src="@drawable/logo"
         tools:ignore="ContentDescription" />
 
 	<LinearLayout 
@@ -35,16 +35,16 @@
 	    	android:layout_margin="10dip"
 	        android:text="@string/take_pic"
 	        android:background="@drawable/selector_btn"/>
-	    <LinearLayout 
-	        android:orientation="horizontal"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_margin="10dip">
+<!-- 	    <LinearLayout  -->
+<!-- 	        android:orientation="horizontal" -->
+<!-- 	        android:layout_width="match_parent" -->
+<!-- 	        android:layout_height="wrap_content" -->
+<!-- 	        android:layout_margin="10dip"> -->
 	        <Button 
 		        android:id="@+id/btn_person_manager"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
-		        android:layout_marginRight="3dip"
+	    		android:layout_margin="10dip"
 		        android:layout_weight="1"
 		        android:text="@string/person_manager"
 		        android:background="@drawable/selector_btn"/>
@@ -52,17 +52,17 @@
 		        android:id="@+id/btn_group_manager"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
-		        android:layout_marginLeft="3dip"
+	    		android:layout_margin="10dip"
 		        android:layout_weight="1"
 		        android:text="@string/group_manager"
 		        android:background="@drawable/selector_btn"/>
-	    </LinearLayout>
-	    <Button 
-	        android:id="@+id/btn_faceset_manager"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	    	android:layout_margin="10dip"
-	        android:text="@string/faceset_manager"
-	        android:background="@drawable/selector_btn"/>
+<!-- 	    </LinearLayout> -->
+<!-- 	    <Button  -->
+<!-- 	        android:id="@+id/btn_faceset_manager" -->
+<!-- 	        android:layout_width="match_parent" -->
+<!-- 	        android:layout_height="wrap_content" -->
+<!-- 	    	android:layout_margin="10dip" -->
+<!-- 	        android:text="@string/faceset_manager" -->
+<!-- 	        android:background="@drawable/selector_btn"/> -->
 	</LinearLayout>
 </RelativeLayout>

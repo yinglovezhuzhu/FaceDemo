@@ -33,11 +33,13 @@ import android.widget.Toast;
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
 import com.xiaoying.facedemo.db.util.PersonDBUtil;
+import com.xiaoying.facedemo.detect.IdentifyFaceActivity;
 import com.xiaoying.facedemo.group.GroupListActivity;
 import com.xiaoying.facedemo.person.adapter.AddGroupAdapter;
 import com.xiaoying.facedemo.utils.LogUtil;
 import com.xiaoying.facedemo.widget.TitleBar;
 import com.xiaoying.faceplusplus.api.config.RespConfig;
+import com.xiaoying.faceplusplus.api.entity.Face;
 import com.xiaoying.faceplusplus.api.entity.Group;
 import com.xiaoying.faceplusplus.api.entity.Person;
 import com.xiaoying.faceplusplus.api.entity.request.person.PersonCreateReq;
@@ -153,11 +155,19 @@ public class CreatePersonActivity extends Activity {
 	
 	private void submit(int mode) {
 		if(mode == MODE_CREATE) {
-			PersonCreateReq req = new PersonCreateReq();
-			req.setPerson_name(mEtName.getText().toString());
-			req.setTag(mEtTag.getText().toString());
-			req.setGroup_id(getAddedGroupIds());
-			new CreatePerson().execute(req);
+			if(mAdapter.getData().isEmpty()) {
+				Toast.makeText(this, R.string.need_chooose_group, Toast.LENGTH_SHORT).show();
+			} else {
+				PersonCreateReq req = new PersonCreateReq();
+				req.setPerson_name(mEtName.getText().toString());
+				req.setTag(mEtTag.getText().toString());
+				req.setGroup_id(getAddedGroupIds());
+				if(getIntent().hasExtra(IdentifyFaceActivity.EXTRA_FACE)) {
+					Face face = (Face) getIntent().getSerializableExtra(IdentifyFaceActivity.EXTRA_FACE);
+					req.setFace_id(face.getFace_id());
+				}
+				new CreatePerson().execute(req);
+			}
 		} else if(mode == MODE_MODIFY) {
 			Person person = (Person) getIntent().getSerializableExtra(EXTRA_OLD_PERSON);
 			person.setPerson_name(mEtName.getText().toString());
@@ -292,7 +302,7 @@ public class CreatePersonActivity extends Activity {
 					person.setPerson_name(result.getPerson_name());
 					person.setTag(result.getTag());
 					PersonDBUtil.insertPerson(CreatePersonActivity.this, person);
-					Intent data = new Intent();
+					Intent data = getIntent();
 					data.putExtra(EXTRA_NEW_PERSON, person);
 					setResult(RESULT_OK, data);
 					finish();

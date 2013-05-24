@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.xiaoying.facedemo.detect.DetectActivity;
-import com.xiaoying.facedemo.faceset.FacesetListActivity;
 import com.xiaoying.facedemo.group.GroupListActivity;
 import com.xiaoying.facedemo.person.PersonListActivity;
 import com.xiaoying.facedemo.utils.LogUtil;
@@ -43,7 +42,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		findViewById(R.id.btn_take_pic).setOnClickListener(this);
 		findViewById(R.id.btn_person_manager).setOnClickListener(this);
 		findViewById(R.id.btn_group_manager).setOnClickListener(this);
-		findViewById(R.id.btn_faceset_manager).setOnClickListener(this);
+//		findViewById(R.id.btn_faceset_manager).setOnClickListener(this);
 		
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -124,11 +123,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		startActivity(intent);
 	}
 	
-	private void gotoFacesetManager() {
-		Intent intent = new Intent(this, FacesetListActivity.class);
-		intent.putExtra(FacesetListActivity.EXTRA_MODE, FacesetListActivity.MODE_VIEW);
-		startActivity(intent);
-	}
+//	private void gotoFacesetManager() {
+//		Intent intent = new Intent(this, FacesetListActivity.class);
+//		intent.putExtra(FacesetListActivity.EXTRA_MODE, FacesetListActivity.MODE_VIEW);
+//		startActivity(intent);
+//	}
 	
 	@Override
 	public void onClick(View v) {
@@ -145,9 +144,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			case R.id.btn_group_manager:
 				gotoGroupManager();
 				break;
-			case R.id.btn_faceset_manager:
-				gotoFacesetManager();
-				break;
+//			case R.id.btn_faceset_manager:
+//				gotoFacesetManager();
+//				break;
 			default :
 				break;
 		}

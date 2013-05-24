@@ -4,7 +4,7 @@
         <item>详情</item>
         <item>修改</item>
         <item>删除</item>
-        <item>添加到Group</item>
+        <item>添加到组</item>
     </string-array>
 
     <string-array name="group_list_long_click_menu">
@@ -15,8 +15,7 @@
 
     <string-array name="face_click_menu">
         <item>识别</item>
-        <item>添加到Person</item>
-        <item>添加到Faceset</item>
+        <item>添加到人物</item>
     </string-array>
 
 </resources>

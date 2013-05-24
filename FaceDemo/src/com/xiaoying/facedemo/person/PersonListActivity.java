@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.xiaoying.facedemo.MainApplication;
 import com.xiaoying.facedemo.R;
+import com.xiaoying.facedemo.detect.IdentifyFaceActivity;
 import com.xiaoying.facedemo.group.GroupListActivity;
 import com.xiaoying.facedemo.person.adapter.PersonListAdapter;
 import com.xiaoying.facedemo.utils.LogUtil;
@@ -108,18 +109,25 @@ public class PersonListActivity extends Activity {
 		mTitleBar.setLeftButton(R.string.backe, mLeftClick);
 		if(mMode == MODE_VIEW) {
 			mTitleBar.setTitle(R.string.person_manager);
+//			mTitleBar.setRightButton(R.string.create, new View.OnClickListener() {
+//				@Override
+//				public void onClick(View v) {
+//					gotoCreatePerson();
+//				}
+//			});
+			mTitleBar.setRightButtonVisible(false);
+			mAdapter = new PersonListAdapter(this);
+			mListView.setOnItemClickListener(mViewItemClick);
+			mListView.setOnItemLongClickListener(mItemLongClick);
+		} else if(mMode == MODE_PICK) {
+			mTitleBar.setTitle(R.string.choose_person);
 			mTitleBar.setRightButton(R.string.create, new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					gotoCreatePerson();
 				}
 			});
-			mAdapter = new PersonListAdapter(this);
-			mListView.setOnItemClickListener(mViewItemClick);
-			mListView.setOnItemLongClickListener(mItemLongClick);
-		} else if(mMode == MODE_PICK) {
-			mTitleBar.setTitle(R.string.choose_person);
-			mTitleBar.setRightButtonVisible(false);
+//			mTitleBar.setRightButtonVisible(false);
 			mAdapter = new PersonListAdapter(this, MODE_PICK);
 			mListView.setOnItemClickListener(mPicItemClick);
 		} else if(mMode == MODE_CHOOSE) {
@@ -166,6 +174,9 @@ public class PersonListActivity extends Activity {
 	private void gotoCreatePerson() {
 		Intent intent = new Intent(this, CreatePersonActivity.class);
 		intent.putExtra(CreatePersonActivity.EXTRA_MODE, CreatePersonActivity.MODE_CREATE);
+		if(getIntent().hasExtra(IdentifyFaceActivity.EXTRA_FACE)) {
+			intent.putExtra(IdentifyFaceActivity.EXTRA_FACE, getIntent().getSerializableExtra(IdentifyFaceActivity.EXTRA_FACE));
+		}
 		startActivityForResult(intent, REQUEST_CREATE_PERSON);
 	}
 	
@@ -234,7 +245,7 @@ public class PersonListActivity extends Activity {
 				public void onClick(DialogInterface dialog, int which) {
 					switch (which) {
 					case 0:
-						
+						gotoPersonDetail(mAdapter.getItem(position));
 						break;
 					case 1:
 						gotoModifyPerson(mAdapter.getItem(position), position);
@@ -276,6 +287,8 @@ public class PersonListActivity extends Activity {
 				case REQUEST_CREATE_PERSON :
 					if(data != null) {
 						mAdapter.add((Person) data.getSerializableExtra(CreatePersonActivity.EXTRA_NEW_PERSON));
+						setResult(RESULT_OK, data);
+						finish();
 					}
 					break;
 				case REQUEST_MODIFY_PREDON:

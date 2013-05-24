@@ -34,7 +34,7 @@ import com.xiaoying.faceplusplus.api.entity.request.recognition.IdentityReq;
 import com.xiaoying.faceplusplus.api.entity.request.recognition.SearchReq;
 import com.xiaoying.faceplusplus.api.entity.request.recognition.VerifyReq;
 import com.xiaoying.faceplusplus.api.entity.response.recognition.CompareResp;
-import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentityResp;
+import com.xiaoying.faceplusplus.api.entity.response.recognition.IdentifyResp;
 import com.xiaoying.faceplusplus.api.entity.response.recognition.SearchResp;
 import com.xiaoying.faceplusplus.api.entity.response.recognition.VerifyResp;
 import com.xiaoying.faceplusplus.api.utils.HttpUtil;
@@ -169,7 +169,7 @@ public class RecognitionService extends BaseService {
 		return result;
 	}
 
-	public IdentityResp identity(IdentityReq body) throws ClientProtocolException, IOException, ParseException, JSONException {
+	public IdentifyResp identity(IdentityReq body) throws ClientProtocolException, IOException, ParseException, JSONException {
 		if(StringUtil.isEmpty(body.getGroup_id()) && StringUtil.isEmpty(body.getGroup_name())) {
 			throw new IllegalArgumentException("group_id or group_name must to be set one");
 		}
@@ -186,7 +186,7 @@ public class RecognitionService extends BaseService {
 		HttpResponse resp = HttpUtil.doPost(UrlConfig.PATH_RECOGNITION_IDENTIFY, params);
 		JSONObject json = new JSONObject(EntityUtils.toString(resp.getEntity()));
 		Log.i(json.toString());
-		IdentityResp result = new IdentityResp();
+		IdentifyResp result = new IdentifyResp();
 		result.setSession_id(json.optString("session_id"));
 		result.setFace(getIdentityFace(json.optJSONArray("face")));
 		result.setError(json.optString("error"));
@@ -221,15 +221,15 @@ public class RecognitionService extends BaseService {
 	 * @param faceArray
 	 * @return
 	 */
-	public List<IdentityResp.IdentityFace> getIdentityFace(JSONArray faceArray) {
-		List<IdentityResp.IdentityFace> faces = new ArrayList<IdentityResp.IdentityFace>();
+	public List<IdentifyResp.IdentifyFace> getIdentityFace(JSONArray faceArray) {
+		List<IdentifyResp.IdentifyFace> faces = new ArrayList<IdentifyResp.IdentifyFace>();
 		if(faceArray != null) {
 			JSONObject faceObj = null;
-			IdentityResp.IdentityFace iFace = null;
+			IdentifyResp.IdentifyFace iFace = null;
 			Face face = null;
 			for(int i = 0; i < faceArray.length(); i++) {
 				faceObj = faceArray.optJSONObject(i);
-				iFace = new IdentityResp.IdentityFace();
+				iFace = new IdentifyResp.IdentifyFace();
 				face = new Face();
 				face.setFace_id(faceObj.optString("face_id"));
 				FaceService.setPosition(faceObj.optJSONObject("position"), face);
@@ -247,14 +247,14 @@ public class RecognitionService extends BaseService {
 	 * @param candidateArray
 	 * @return
 	 */
-	private List<IdentityResp.Candidate> getIdentityCanditate(JSONArray candidateArray) {
-		List<IdentityResp.Candidate> candidates = new ArrayList<IdentityResp.Candidate>();
+	private List<IdentifyResp.Candidate> getIdentityCanditate(JSONArray candidateArray) {
+		List<IdentifyResp.Candidate> candidates = new ArrayList<IdentifyResp.Candidate>();
 		if(candidateArray != null) {
 			JSONObject candidateObj = null;
-			IdentityResp.Candidate candidate = null;
+			IdentifyResp.Candidate candidate = null;
 			for(int i = 0; i < candidateArray.length(); i++) {
 				candidateObj = candidateArray.optJSONObject(i);
-				candidate = new IdentityResp.Candidate();
+				candidate = new IdentifyResp.Candidate();
 				candidate.setPerson_id(candidateObj.optString("person_id"));
 				candidate.setPerson_name(candidateObj.optString("person_name"));
 				candidate.setTag(candidateObj.optString("tag"));

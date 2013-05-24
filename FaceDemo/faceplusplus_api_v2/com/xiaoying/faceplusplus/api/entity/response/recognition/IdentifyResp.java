@@ -22,10 +22,10 @@ import com.xiaoying.faceplusplus.api.entity.response.BaseResponse;
  * @author xiaoying
  *
  */
-public class IdentityResp extends BaseResponse {
+public class IdentifyResp extends BaseResponse {
 
 	private String session_id;	//相应请求的session标识符，可用于结果查询
-	private List<IdentityFace> face; //人脸的列表
+	private List<IdentifyFace> face; //人脸的列表
 	
 	/**
 	 * 相应请求的session标识符，可用于结果查询
@@ -47,7 +47,7 @@ public class IdentityResp extends BaseResponse {
 	 * 相应请求的session标识符，可用于结果查询
 	 * @return the face
 	 */
-	public List<IdentityFace> getFace() {
+	public List<IdentifyFace> getFace() {
 		return face;
 	}
 
@@ -55,7 +55,7 @@ public class IdentityResp extends BaseResponse {
 	 * 相应请求的session标识符，可用于结果查询
 	 * @param face the face to set
 	 */
-	public void setFace(List<IdentityFace> face) {
+	public void setFace(List<IdentifyFace> face) {
 		this.face = face;
 	}
 	
@@ -79,7 +79,7 @@ public class IdentityResp extends BaseResponse {
 	 * @author xiaoying
 	 *
 	 */
-	public static class IdentityFace {
+	public static class IdentifyFace {
 		private Face face;	//人脸信息
 		private List<Candidate> candidates;	//识别结果。candidates包含不超过3个人，包含相应person信息与相应的置信度
 		
